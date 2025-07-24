@@ -69,3 +69,151 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+export async function POST(request: NextRequest) {
+  try {
+    console.log("POST /api/progress - Starting request");
+    const session = await getServerSession(authOptions);
+    console.log("Full session object:", JSON.stringify(session, null, 2));
+    console.log("Session check:", {
+      hasSession: !!session,
+      hasUser: !!session?.user,
+      hasUserId: !!session?.user?.id,
+      userId: session?.user?.id,
+      userObject: session?.user,
+    });
+
+    // Try to get user ID from session, or fallback to finding by email
+    let userId = session?.user?.id;
+
+    if (!userId && session?.user?.email) {
+      console.log(
+        "No user ID in session, trying to find user by email:",
+        session.user.email
+      );
+      const user = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        select: { id: true },
+      });
+      userId = user?.id;
+      console.log("Found user by email:", {
+        userId,
+        email: session.user.email,
+      });
+    }
+
+    if (!userId) {
+      console.log("Unauthorized request - no session, user ID, or email");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    console.log("Request body:", body);
+    const { courseId, completed, score } = body;
+
+    if (!courseId) {
+      console.log("Missing courseId in request");
+      return NextResponse.json(
+        { error: "Course ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Get course and material info
+    console.log("Looking up course:", courseId);
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+      include: { material: true },
+    });
+    console.log("Course found:", {
+      found: !!course,
+      courseId: course?.id,
+      materialId: course?.materialId,
+      xpReward: course?.xpReward,
+    });
+
+    if (!course) {
+      console.log("Course not found in database");
+      return NextResponse.json({ error: "Course not found" }, { status: 404 });
+    }
+
+    // Check if progress already exists
+    const existingProgress = await prisma.courseProgress.findFirst({
+      where: {
+        userId: userId,
+        courseId: courseId,
+      },
+    });
+
+    let progress;
+    if (existingProgress) {
+      // Update existing progress
+      progress = await prisma.courseProgress.update({
+        where: {
+          id: existingProgress.id,
+        },
+        data: {
+          completed: completed,
+          score: score,
+          completedAt: completed ? new Date() : null,
+          updatedAt: new Date(),
+        },
+      });
+    } else {
+      // Create new progress
+      progress = await prisma.courseProgress.create({
+        data: {
+          userId: userId,
+          courseId: courseId,
+          materialId: course.materialId,
+          completed: completed,
+          score: score,
+          completedAt: completed ? new Date() : null,
+        },
+      });
+    }
+
+    // Update user XP if course is completed
+    if (completed) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          xp: {
+            increment: course.xpReward,
+          },
+        },
+      });
+    }
+
+    console.log("Course progress updated successfully:", {
+      userId: userId,
+      courseId: courseId,
+      completed: completed,
+      score: score,
+      xpEarned: completed ? course.xpReward : 0,
+    });
+
+    return NextResponse.json({
+      success: true,
+      progress,
+      xpEarned: completed ? course.xpReward : 0,
+    });
+  } catch (error) {
+    console.error("Error updating progress:", error);
+    console.error("Error details:", {
+      message: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : undefined,
+      courseId: body?.courseId,
+      userId: userId,
+      sessionUserId: session?.user?.id,
+      sessionEmail: session?.user?.email,
+    });
+    return NextResponse.json(
+      {
+        error: "Failed to update progress",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
+  }
+}

@@ -37,7 +37,7 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        return {
+        const authUser = {
           id: user.id,
           email: user.email,
           name: user.name,
@@ -48,6 +48,14 @@ export const authOptions: NextAuthOptions = {
           xp: user.xp,
           gold: user.gold,
         };
+
+        console.log("Authorize function - returning user:", {
+          id: authUser.id,
+          email: authUser.email,
+          hasId: !!authUser.id,
+        });
+
+        return authUser;
       },
     }),
   ],
@@ -56,6 +64,13 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async jwt({ token, user, trigger, session }) {
+      console.log("JWT callback - input:", {
+        hasUser: !!user,
+        userId: user?.id,
+        tokenId: token.id,
+        trigger,
+      });
+
       if (user) {
         token.id = user.id;
         token.username = user.username;
@@ -63,6 +78,11 @@ export const authOptions: NextAuthOptions = {
         token.currentGrade = user.currentGrade;
         token.xp = user.xp;
         token.gold = user.gold;
+
+        console.log("JWT callback - after setting token:", {
+          tokenId: token.id,
+          userId: user.id,
+        });
       }
 
       if (trigger === "update") {
@@ -91,6 +111,12 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
+      console.log("Session callback - input:", {
+        hasToken: !!token,
+        tokenId: token?.id,
+        sessionUserId: session?.user?.id,
+      });
+
       if (token) {
         session.user.id = token.id as string;
         session.user.username = token.username as string;
@@ -98,6 +124,11 @@ export const authOptions: NextAuthOptions = {
         session.user.currentGrade = token.currentGrade as number;
         session.user.xp = token.xp as number;
         session.user.gold = token.gold as number;
+
+        console.log("Session callback - after setting session:", {
+          sessionUserId: session.user.id,
+          tokenId: token.id,
+        });
       }
       return session;
     },
