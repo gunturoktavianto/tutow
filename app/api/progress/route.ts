@@ -5,9 +5,36 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   try {
+    console.log("GET /api/progress - Starting request");
     const session = await getServerSession(authOptions);
+    console.log("Session in GET progress:", {
+      hasSession: !!session,
+      hasUser: !!session?.user,
+      hasUserId: !!session?.user?.id,
+      userId: session?.user?.id,
+      userEmail: session?.user?.email,
+    });
 
-    if (!session?.user?.id) {
+    let userId = session?.user?.id;
+
+    if (!userId && session?.user?.email) {
+      console.log(
+        "No user ID in session, finding user by email:",
+        session.user.email
+      );
+      const user = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        select: { id: true },
+      });
+      userId = user?.id;
+      console.log("Found user by email:", {
+        userId,
+        email: session.user.email,
+      });
+    }
+
+    if (!userId) {
+      console.log("Unauthorized request - no user ID found");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -15,15 +42,24 @@ export async function GET(request: NextRequest) {
     const materialId = searchParams.get("materialId");
     const gradeId = searchParams.get("gradeId");
 
+    console.log("Progress query params:", { materialId, gradeId, userId });
+
     if (materialId) {
       const progress = await prisma.courseProgress.findMany({
         where: {
-          userId: session.user.id,
+          userId: userId,
           materialId: materialId,
         },
         include: {
           course: true,
         },
+      });
+
+      console.log("Found progress for material:", {
+        materialId,
+        userId,
+        progressCount: progress.length,
+        completedCount: progress.filter((p) => p.completed).length,
       });
 
       return NextResponse.json({ progress });
@@ -32,7 +68,7 @@ export async function GET(request: NextRequest) {
     if (gradeId) {
       const progress = await prisma.courseProgress.findMany({
         where: {
-          userId: session.user.id,
+          userId: userId,
           material: {
             gradeId: gradeId,
           },
@@ -43,12 +79,19 @@ export async function GET(request: NextRequest) {
         },
       });
 
+      console.log("Found progress for grade:", {
+        gradeId,
+        userId,
+        progressCount: progress.length,
+        completedCount: progress.filter((p) => p.completed).length,
+      });
+
       return NextResponse.json({ progress });
     }
 
     const allProgress = await prisma.courseProgress.findMany({
       where: {
-        userId: session.user.id,
+        userId: userId,
       },
       include: {
         course: true,
@@ -58,6 +101,12 @@ export async function GET(request: NextRequest) {
           },
         },
       },
+    });
+
+    console.log("Found all progress:", {
+      userId,
+      progressCount: allProgress.length,
+      completedCount: allProgress.filter((p) => p.completed).length,
     });
 
     return NextResponse.json({ progress: allProgress });

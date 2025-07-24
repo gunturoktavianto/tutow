@@ -291,7 +291,13 @@ const ObjectRenderer = ({
   }
 };
 
-export function Course1_1_Bilangan() {
+export function Course1_1_Bilangan({
+  courseId,
+  courseData,
+}: {
+  courseId: string;
+  courseData?: any;
+}) {
   const [currentActivity, setCurrentActivity] = useState<
     "counting" | "grid" | "congratulation"
   >("counting");
@@ -312,6 +318,12 @@ export function Course1_1_Bilangan() {
   const [courseCompleted, setCourseCompleted] = useState(false);
   const [isUpdatingProgress, setIsUpdatingProgress] = useState(false);
   const [progressUpdateFailed, setProgressUpdateFailed] = useState(false);
+
+  console.log("Course1_1_Bilangan - Props received:", {
+    courseId,
+    courseData,
+    hasRealCourseId: !!courseId,
+  });
 
   const handleCountingInputChange = (
     exerciseId: number,
@@ -437,22 +449,30 @@ export function Course1_1_Bilangan() {
 
   const updateCourseCompletion = async () => {
     try {
-      console.log("Updating course completion...");
+      console.log("Updating course completion...", {
+        courseId,
+        courseTitle: courseData?.title,
+        hasValidCourseId: !!courseId,
+      });
 
       // Add timeout to prevent hanging
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+      const requestBody = {
+        courseId: courseId,
+        completed: true,
+        score: 100,
+      };
+
+      console.log("Progress update request body:", requestBody);
 
       const response = await fetch("/api/progress", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          courseId: "cmdheim6v0004yz100yq8h178",
-          completed: true,
-          score: 100,
-        }),
+        body: JSON.stringify(requestBody),
         signal: controller.signal,
       });
 

@@ -111,7 +111,8 @@ export function CoursePage({
 
     return (
       <CourseLoader
-        courseId={course.id}
+        courseId={course.title}
+        courseData={course}
         fallback={<DefaultCourseFallback course={course} />}
         onError={(error) => {
           console.error("Error loading course component:", error);

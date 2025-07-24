@@ -85,11 +85,19 @@ export function MaterialPage({ gradeNumber, materialId }: MaterialPageProps) {
         );
         const coursesData = await coursesResponse.json();
 
-        // Get user progress for this material
+        // Get user progress for this material - add cache busting
         const progressResponse = await fetch(
-          `/api/progress?materialId=${targetMaterial.id}`
+          `/api/progress?materialId=${targetMaterial.id}&t=${Date.now()}`
         );
         const progressData = await progressResponse.json();
+
+        console.log("MaterialPage - Progress data received:", {
+          materialId: targetMaterial.id,
+          progressData,
+          progressCount: progressData.progress?.length || 0,
+          completedCount:
+            progressData.progress?.filter((p: any) => p.completed).length || 0,
+        });
 
         setMaterial(coursesData.material);
         setUserProgress(progressData.progress || []);
@@ -102,6 +110,19 @@ export function MaterialPage({ gradeNumber, materialId }: MaterialPageProps) {
     };
 
     fetchMaterial();
+
+    // Also refetch when the page becomes visible (user returns from course)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        fetchMaterial();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, [gradeNumber, materialId]);
 
   if (loading) {
@@ -134,9 +155,20 @@ export function MaterialPage({ gradeNumber, materialId }: MaterialPageProps) {
     const course = material.courses[courseIndex];
     if (!course) return false;
 
-    return userProgress.some(
+    const isCompleted = userProgress.some(
       (progress) => progress.courseId === course.id && progress.completed
     );
+
+    console.log("getCourseCompleted check:", {
+      courseIndex,
+      courseId: course.id,
+      courseTitle: course.title,
+      isCompleted,
+      userProgressCount: userProgress.length,
+      matchingProgress: userProgress.filter((p) => p.courseId === course.id),
+    });
+
+    return isCompleted;
   };
 
   const totalCompleted = material.courses.filter((_, index) =>

@@ -1,7 +1,7 @@
 import { registerCourse } from "@/lib/course-registry";
 import { Course1_1_Bilangan } from "./course";
 
-registerCourse("cmdheim6v0004yz100yq8h178", {
+registerCourse("Menghitung & Menulis Angka", {
   component: Course1_1_Bilangan,
   metadata: {
     title: "Menghitung & Menulis Angka",

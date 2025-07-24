@@ -3,17 +3,20 @@ import { getCourseComponent, CourseMetadata } from "./course-registry";
 
 export interface CourseLoaderProps {
   courseId: string;
+  courseData?: any; // Additional course data from database
   fallback?: React.ReactNode;
   onError?: (error: Error) => void;
 }
 
 export interface CourseComponentProps {
   courseId: string;
+  courseData?: any;
   metadata?: CourseMetadata;
 }
 
 export function CourseLoader({
   courseId,
+  courseData,
   fallback,
   onError,
 }: CourseLoaderProps): React.ReactElement {
@@ -27,7 +30,8 @@ export function CourseLoader({
     const { component: CourseComponent, metadata } = courseEntry;
 
     return React.createElement(CourseComponent, {
-      courseId,
+      courseId: courseData?.id || courseId, // Use database ID for progress tracking
+      courseData,
       metadata,
     } as CourseComponentProps);
   } catch (error) {
