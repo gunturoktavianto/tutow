@@ -23,11 +23,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { PomodoroTimer } from "@/components/pomodoro-timer";
 import {
   BookOpen,
   Gamepad2,
   Trophy,
-  Timer,
   Coins,
   Star,
   Home,
@@ -129,9 +129,7 @@ export function Navigation() {
                 </div>
 
                 {/* Pomodoro Timer */}
-                <Button variant="outline" size="sm" className="p-2">
-                  <Timer className="w-4 h-4" />
-                </Button>
+                <PomodoroTimer />
 
                 {/* User Menu */}
                 <DropdownMenu>
