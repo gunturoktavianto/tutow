@@ -1,0 +1,159 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Eye, EyeOff, Star, BookOpen, Trophy } from "lucide-react";
+
+export default function Login() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // TODO: Implement actual login logic
+    console.log("Login attempt:", formData);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center p-4">
+      {/* Decorative elements */}
+      <div className="absolute top-20 left-10 text-yellow-400 animate-bounce">
+        <Star className="w-8 h-8" />
+      </div>
+      <div className="absolute top-32 right-16 text-blue-400 animate-pulse">
+        <BookOpen className="w-10 h-10" />
+      </div>
+      <div className="absolute bottom-20 left-20 text-purple-400 animate-bounce delay-1000">
+        <Trophy className="w-8 h-8" />
+      </div>
+
+      <div className="w-full max-w-md">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-white font-bold text-3xl mx-auto mb-4">
+            T
+          </div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Tutow
+          </h1>
+          <p className="text-gray-600 mt-2">Selamat datang kembali!</p>
+        </div>
+
+        <Card className="border-2 border-blue-100 shadow-xl">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl text-gray-900">
+              Masuk ke Akun
+            </CardTitle>
+            <CardDescription>
+              Lanjutkan petualangan matematika seru kamu
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  placeholder="nama@email.com"
+                  required
+                  className="border-2 border-gray-200 focus:border-blue-400"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    placeholder="Masukkan password"
+                    required
+                    className="border-2 border-gray-200 focus:border-blue-400 pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 text-lg font-semibold"
+              >
+                Masuk
+              </Button>
+            </form>
+
+            <div className="mt-6 text-center">
+              <p className="text-gray-600 mb-4">
+                Belum punya akun?{" "}
+                <Link
+                  href="/register"
+                  className="text-blue-600 hover:text-blue-700 font-semibold"
+                >
+                  Daftar di sini
+                </Link>
+              </p>
+
+              <Link
+                href="/forgot-password"
+                className="text-sm text-gray-500 hover:text-gray-700"
+              >
+                Lupa password?
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Fun Facts */}
+        <div className="mt-8 text-center">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-blue-100">
+            <p className="text-sm text-gray-600 mb-2">
+              💡 <strong>Tahukah kamu?</strong>
+            </p>
+            <p className="text-xs text-gray-500">
+              Anak-anak yang bermain sambil belajar matematika 3x lebih cepat
+              memahami konsep!
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

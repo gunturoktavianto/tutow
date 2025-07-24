@@ -1,0 +1,269 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  password      String?
+  username      String    @unique
+  school        String?
+  emailVerified DateTime?
+  image         String?
+  xp            Int       @default(0)
+  gold          Int       @default(100)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts    Account[]
+  sessions    Session[]
+  progress    CourseProgress[]
+  exercises   ExerciseSession[]
+  garden      Garden?
+  badges      UserBadge[]
+  dailyTasks  DailyTask[]
+  weeklyTasks WeeklyTask[]
+
+  @@map("users")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Grade {
+  id          String     @id @default(cuid())
+  name        String     @unique
+  displayName String
+  order       Int        @unique
+  materials   Material[]
+  exercises   Exercise[]
+
+  @@map("grades")
+}
+
+model Material {
+  id          String   @id @default(cuid())
+  name        String
+  displayName String
+  description String?
+  gradeId     String
+  order       Int
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  grade    Grade            @relation(fields: [gradeId], references: [id])
+  courses  Course[]
+  exercises Exercise[]
+  progress CourseProgress[]
+
+  @@unique([gradeId, order])
+  @@map("materials")
+}
+
+model Course {
+  id          String @id @default(cuid())
+  title       String
+  description String?
+  materialId  String
+  level       Int // 1, 2, or 3
+  order       Int
+  content     Json // Interactive content data
+  xpReward    Int    @default(10)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  material Material         @relation(fields: [materialId], references: [id])
+  progress CourseProgress[]
+
+  @@unique([materialId, level, order])
+  @@map("courses")
+}
+
+model CourseProgress {
+  id         String   @id @default(cuid())
+  userId     String
+  courseId   String
+  materialId String
+  completed  Boolean  @default(false)
+  score      Int?
+  timeSpent  Int? // in seconds
+  completedAt DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id])
+  course   Course   @relation(fields: [courseId], references: [id])
+  material Material @relation(fields: [materialId], references: [id])
+
+  @@unique([userId, courseId])
+  @@map("course_progress")
+}
+
+model Exercise {
+  id         String @id @default(cuid())
+  question   String
+  options    Json // Array of options for multiple choice
+  answer     String
+  explanation String?
+  difficulty String // "easy", "medium", "hard"
+  materialId String
+  gradeId    String
+  imageUrl   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  material Material          @relation(fields: [materialId], references: [id])
+  grade    Grade             @relation(fields: [gradeId], references: [id])
+  answers  ExerciseAnswer[]
+
+  @@map("exercises")
+}
+
+model ExerciseSession {
+  id           String   @id @default(cuid())
+  userId       String
+  materialId   String?
+  gradeId      String?
+  totalQuestions Int
+  correctAnswers Int
+  totalTime    Int // in seconds
+  goldEarned   Int      @default(0)
+  completedAt  DateTime @default(now())
+
+  user      User                    @relation(fields: [userId], references: [id])
+  answers   ExerciseAnswer[]
+
+  @@map("exercise_sessions")
+}
+
+model ExerciseAnswer {
+  id        String  @id @default(cuid())
+  sessionId String
+  exerciseId String
+  userAnswer String
+  isCorrect Boolean
+  timeSpent Int // in seconds
+
+  session  ExerciseSession @relation(fields: [sessionId], references: [id])
+  exercise Exercise        @relation(fields: [exerciseId], references: [id])
+
+  @@map("exercise_answers")
+}
+
+model Garden {
+  id     String @id @default(cuid())
+  userId String @unique
+  pots   Json // Array of 5 pot objects with plant data
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("gardens")
+}
+
+model Badge {
+  id          String @id @default(cuid())
+  name        String @unique
+  displayName String
+  description String
+  category    String // "material", "grade", "exercise", "milestone"
+  requirement Json // Criteria for earning the badge
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+
+  userBadges UserBadge[]
+
+  @@map("badges")
+}
+
+model UserBadge {
+  id       String   @id @default(cuid())
+  userId   String
+  badgeId  String
+  earnedAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id])
+  badge Badge @relation(fields: [badgeId], references: [id])
+
+  @@unique([userId, badgeId])
+  @@map("user_badges")
+}
+
+model DailyTask {
+  id          String   @id @default(cuid())
+  userId      String
+  task        String
+  description String
+  target      Int
+  progress    Int      @default(0)
+  goldReward  Int      @default(10)
+  xpReward    Int      @default(5)
+  completed   Boolean  @default(false)
+  date        DateTime
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, date, task])
+  @@map("daily_tasks")
+}
+
+model WeeklyTask {
+  id          String   @id @default(cuid())
+  userId      String
+  task        String
+  description String
+  target      Int
+  progress    Int      @default(0)
+  goldReward  Int      @default(50)
+  xpReward    Int      @default(25)
+  completed   Boolean  @default(false)
+  weekStart   DateTime
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, weekStart, task])
+  @@map("weekly_tasks")
+}
