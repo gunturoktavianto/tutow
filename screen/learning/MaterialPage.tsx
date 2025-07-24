@@ -2,14 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ChevronRight, Play, CheckCircle, Lock } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -91,14 +83,6 @@ export function MaterialPage({ gradeNumber, materialId }: MaterialPageProps) {
         );
         const progressData = await progressResponse.json();
 
-        console.log("MaterialPage - Progress data received:", {
-          materialId: targetMaterial.id,
-          progressData,
-          progressCount: progressData.progress?.length || 0,
-          completedCount:
-            progressData.progress?.filter((p: any) => p.completed).length || 0,
-        });
-
         setMaterial(coursesData.material);
         setUserProgress(progressData.progress || []);
       } catch (err) {
@@ -127,10 +111,10 @@ export function MaterialPage({ gradeNumber, materialId }: MaterialPageProps) {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[80vh]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Memuat materi...</p>
+          <div className="animate-bounce text-7xl mb-4">🔄</div>
+          <p className="text-xl font-bold">Tunggu sebentar ya...</p>
         </div>
       </div>
     );
@@ -138,13 +122,16 @@ export function MaterialPage({ gradeNumber, materialId }: MaterialPageProps) {
 
   if (error || !material) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[80vh]">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600">
+          <div className="text-7xl mb-4">😢</div>
+          <h1 className="text-2xl font-bold text-red-600 mb-4">
             {error || "Materi tidak ditemukan"}
           </h1>
           <Link href={`/learning/${gradeNumber}`}>
-            <Button className="mt-4">Kembali ke Kelas {gradeNumber}</Button>
+            <Button className="mt-4 text-lg px-6 py-6 rounded-full">
+              Kembali
+            </Button>
           </Link>
         </div>
       </div>
@@ -159,15 +146,6 @@ export function MaterialPage({ gradeNumber, materialId }: MaterialPageProps) {
       (progress) => progress.courseId === course.id && progress.completed
     );
 
-    console.log("getCourseCompleted check:", {
-      courseIndex,
-      courseId: course.id,
-      courseTitle: course.title,
-      isCompleted,
-      userProgressCount: userProgress.length,
-      matchingProgress: userProgress.filter((p) => p.courseId === course.id),
-    });
-
     return isCompleted;
   };
 
@@ -179,145 +157,154 @@ export function MaterialPage({ gradeNumber, materialId }: MaterialPageProps) {
       ? Math.round((totalCompleted / material.courses.length) * 100)
       : 0;
 
-  const levelColors = {
-    1: "bg-blue-500",
-    2: "bg-green-500",
-    3: "bg-purple-500",
-  };
-
-  const levelNames = {
-    1: "Pemahaman Dasar",
-    2: "Aplikasi",
-    3: "Soal Eksploratif",
-  };
+  // Course emojis for different levels
+  const courseEmojis = ["📚", "🧮", "🎯", "🏆", "⭐", "🎪", "🎨", "🔥"];
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Breadcrumb */}
-      <div className="flex items-center space-x-2 text-sm text-gray-600 mb-6">
-        <Link href="/learning" className="hover:text-blue-600">
-          Belajar
+    <div className="container mx-auto px-4 py-6">
+      {/* Simple Header */}
+      <div className="mb-6 text-center">
+        <Link href={`/learning/${gradeNumber}`} className="inline-block mb-4">
+          <Button variant="outline" size="lg" className="rounded-full">
+            ← Kembali
+          </Button>
         </Link>
-        <ChevronRight className="w-4 h-4" />
-        <Link href={`/learning/${gradeNumber}`} className="hover:text-blue-600">
-          Kelas {gradeNumber}
-        </Link>
-        <ChevronRight className="w-4 h-4" />
-        <span className="font-medium">{material.displayName}</span>
-      </div>
-
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">
-              🔢 {material.displayName}
-            </h1>
-            <p className="text-xl text-gray-600">{material.description}</p>
-          </div>
-          <div className="text-6xl">🎯</div>
-        </div>
-
-        {/* Progress Summary */}
-        <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-6 text-white mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-xl font-bold">Progress Materi</h3>
-              <p className="text-blue-100">
-                {totalCompleted} dari {material.courses.length} pelajaran
-                selesai
-              </p>
-            </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold">{overallProgress}%</div>
-              <div className="text-sm text-blue-100">Selesai</div>
-            </div>
-          </div>
-          <Progress value={overallProgress} className="h-2 bg-white/20" />
+        <div className="flex justify-center items-center gap-4">
+          <h1 className="text-4xl font-bold">{material.displayName}</h1>
+          <div className="text-6xl">🔢</div>
         </div>
       </div>
 
-      {/* Courses List */}
-      <div className="space-y-4">
+      {/* Progress Bar */}
+      <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-3xl p-6 mb-8 max-w-xl mx-auto shadow-lg">
+        <div className="flex items-center gap-4 mb-3">
+          <div className="text-5xl">🚀</div>
+          <div className="text-white text-xl font-bold">
+            {overallProgress}% Selesai
+          </div>
+        </div>
+        <Progress
+          value={overallProgress}
+          className="h-6 bg-white/20 rounded-full"
+        />
+        <div className="mt-3 text-white text-sm">
+          {totalCompleted} dari {material.courses.length} pelajaran
+        </div>
+      </div>
+
+      {/* Courses Grid - Visual Card Style for Kids */}
+      <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-6">
         {material.courses.map((course, index) => {
           const completed = getCourseCompleted(index);
           const isUnlocked = index === 0 || getCourseCompleted(index - 1);
+          const emoji = courseEmojis[index % courseEmojis.length];
 
           return (
-            <Card
+            <Link
               key={course.id}
-              className={`border-2 transition-all duration-300 ${
-                completed
-                  ? "border-green-200 bg-green-50"
-                  : isUnlocked
-                  ? "border-gray-200 hover:border-blue-300 cursor-pointer"
-                  : "border-gray-100 bg-gray-50"
-              }`}
+              href={
+                isUnlocked
+                  ? `/learning/${gradeNumber}/${materialId}/${titleToSlug(
+                      course.title
+                    )}`
+                  : "#"
+              }
+              className={!isUnlocked ? "pointer-events-none" : ""}
             >
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-3">
-                      <div
-                        className={`w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold ${
-                          levelColors[course.level as keyof typeof levelColors]
-                        }`}
-                      >
-                        {course.level}
-                      </div>
-                      <div>
-                        <div className="flex items-center space-x-2 mb-1">
-                          <CardTitle className="text-lg">
-                            {course.title}
-                          </CardTitle>
-                          <Badge variant="outline" className="text-xs">
-                            {
-                              levelNames[
-                                course.level as keyof typeof levelNames
-                              ]
-                            }
-                          </Badge>
-                        </div>
-                        <CardDescription>{course.description}</CardDescription>
-                      </div>
+              <div
+                className={`
+                relative rounded-3xl overflow-hidden shadow-lg transition-all duration-300 p-6
+                ${
+                  completed
+                    ? "bg-gradient-to-br from-green-100 to-green-200 border-2 border-green-300"
+                    : isUnlocked
+                    ? "bg-gradient-to-br from-white to-blue-100 hover:shadow-xl transform hover:-translate-y-2"
+                    : "bg-gray-200 opacity-70"
+                }
+              `}
+              >
+                {!isUnlocked && (
+                  <div className="absolute inset-0 bg-gray-100/80 backdrop-blur-sm flex items-center justify-center z-10">
+                    <div className="text-center">
+                      <div className="text-6xl mb-2">🔒</div>
+                      <p className="text-lg font-bold">Belum Terbuka</p>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-4">
-                    <div className="text-right text-sm text-gray-600">
-                      <div>15-25 menit</div>
-                      <div>+{course.xpReward} XP</div>
+                )}
+
+                <div className="flex items-center gap-6">
+                  {/* Left Section - Level */}
+
+                  {/* Right Section - Content */}
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold mb-2">
+                      {emoji}
+                      {course.title}
+                    </h3>
+
+                    {/* Level Badge */}
+                    <div className="mb-3">
+                      <Badge
+                        variant="outline"
+                        className={`
+                        ${
+                          course.level === 1
+                            ? "bg-blue-100 text-blue-700"
+                            : course.level === 2
+                            ? "bg-green-100 text-green-700"
+                            : "bg-purple-100 text-purple-700"
+                        }
+                      `}
+                      >
+                        {course.level === 1
+                          ? "Dasar"
+                          : course.level === 2
+                          ? "Menengah"
+                          : "Lanjut"}
+                      </Badge>
                     </div>
-                    {completed ? (
-                      <CheckCircle className="w-8 h-8 text-green-500" />
-                    ) : isUnlocked ? (
-                      <div className="w-8 h-8 rounded-full border-2 border-blue-500 flex items-center justify-center">
-                        <Play className="w-4 h-4 text-blue-500" />
+
+                    {/* Action Button */}
+                    <div className="mt-4">
+                      <div
+                        className={`
+                        rounded-full px-6 py-3 font-bold text-white text-center
+                        ${
+                          completed
+                            ? "bg-green-500"
+                            : isUnlocked
+                            ? "bg-blue-500"
+                            : "bg-gray-400"
+                        }
+                      `}
+                      >
+                        {completed
+                          ? "Ulangi 🔄"
+                          : isUnlocked
+                          ? "Mulai 🎯"
+                          : "Terkunci 🔒"}
                       </div>
+                    </div>
+
+                    {/* XP Reward */}
+                    <div className="mt-3 text-sm text-gray-600 font-medium">
+                      ⭐ +{course.xpReward} XP
+                    </div>
+                  </div>
+
+                  {/* Status Icon */}
+                  <div className="flex-shrink-0">
+                    {completed ? (
+                      <div className="text-4xl">✅</div>
+                    ) : isUnlocked ? (
+                      <div className=""></div>
                     ) : (
-                      <Lock className="w-8 h-8 text-gray-400" />
+                      <div className="text-4xl text-gray-300">🔒</div>
                     )}
                   </div>
                 </div>
-              </CardHeader>
-
-              <CardContent className="pt-0">
-                {isUnlocked ? (
-                  <Link
-                    href={`/learning/${gradeNumber}/${materialId}/${titleToSlug(
-                      course.title
-                    )}`}
-                  >
-                    <Button className="w-full">
-                      {completed ? "Ulangi Pelajaran" : "Mulai Pelajaran"}
-                    </Button>
-                  </Link>
-                ) : (
-                  <Button disabled className="w-full">
-                    Selesaikan pelajaran sebelumnya
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
+              </div>
+            </Link>
           );
         })}
       </div>
