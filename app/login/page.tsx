@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,15 +18,36 @@ import { Eye, EyeOff, Star, BookOpen, Trophy } from "lucide-react";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement actual login logic
-    console.log("Login attempt:", formData);
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const result = await signIn("credentials", {
+        email: formData.email,
+        password: formData.password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError("Email atau password salah");
+      } else {
+        router.push("/dashboard");
+      }
+    } catch (error) {
+      setError("Terjadi kesalahan. Silakan coba lagi.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,6 +94,12 @@ export default function Login() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg">
+                  {error}
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -81,6 +110,7 @@ export default function Login() {
                   onChange={handleInputChange}
                   placeholder="nama@email.com"
                   required
+                  disabled={isLoading}
                   className="border-2 border-gray-200 focus:border-blue-400"
                 />
               </div>
@@ -96,12 +126,14 @@ export default function Login() {
                     onChange={handleInputChange}
                     placeholder="Masukkan password"
                     required
+                    disabled={isLoading}
                     className="border-2 border-gray-200 focus:border-blue-400 pr-10"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    disabled={isLoading}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 disabled:opacity-50"
                   >
                     {showPassword ? (
                       <EyeOff className="w-4 h-4" />
@@ -114,9 +146,10 @@ export default function Login() {
 
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 text-lg font-semibold"
+                disabled={isLoading}
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Masuk
+                {isLoading ? "Memproses..." : "Masuk"}
               </Button>
             </form>
 
@@ -130,13 +163,6 @@ export default function Login() {
                   Daftar di sini
                 </Link>
               </p>
-
-              <Link
-                href="/forgot-password"
-                className="text-sm text-gray-500 hover:text-gray-700"
-              >
-                Lupa password?
-              </Link>
             </div>
           </CardContent>
         </Card>

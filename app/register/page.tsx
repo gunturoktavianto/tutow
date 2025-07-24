@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,6 +18,7 @@ import { Eye, EyeOff, Star, BookOpen, Trophy, CheckCircle } from "lucide-react";
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -27,11 +29,11 @@ export default function Register() {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Basic validation
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
@@ -65,10 +67,36 @@ export default function Register() {
       return;
     }
 
-    // Clear errors and submit
+    setIsLoading(true);
     setErrors({});
-    console.log("Registration attempt:", formData);
-    // TODO: Implement actual registration logic
+
+    try {
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          username: formData.username,
+          password: formData.password,
+          school: formData.school || undefined,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        router.push("/login?message=Akun berhasil dibuat. Silakan login.");
+      } else {
+        setErrors({ general: data.error || "Terjadi kesalahan" });
+      }
+    } catch (error) {
+      setErrors({ general: "Terjadi kesalahan pada server" });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,6 +153,12 @@ export default function Register() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {errors.general && (
+                <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg">
+                  {errors.general}
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="name">Nama Lengkap</Label>
                 <Input
@@ -134,6 +168,7 @@ export default function Register() {
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="Masukkan nama lengkap"
+                  disabled={isLoading}
                   className={`border-2 ${
                     errors.name
                       ? "border-red-300 focus:border-red-400"
@@ -154,6 +189,7 @@ export default function Register() {
                   value={formData.email}
                   onChange={handleInputChange}
                   placeholder="nama@email.com"
+                  disabled={isLoading}
                   className={`border-2 ${
                     errors.email
                       ? "border-red-300 focus:border-red-400"
@@ -174,6 +210,7 @@ export default function Register() {
                   value={formData.username}
                   onChange={handleInputChange}
                   placeholder="username (hanya huruf)"
+                  disabled={isLoading}
                   className={`border-2 ${
                     errors.username
                       ? "border-red-300 focus:border-red-400"
@@ -197,6 +234,7 @@ export default function Register() {
                   value={formData.school}
                   onChange={handleInputChange}
                   placeholder="Nama sekolah"
+                  disabled={isLoading}
                   className="border-2 border-gray-200 focus:border-blue-400"
                 />
               </div>
@@ -211,6 +249,7 @@ export default function Register() {
                     value={formData.password}
                     onChange={handleInputChange}
                     placeholder="Minimal 6 karakter"
+                    disabled={isLoading}
                     className={`border-2 pr-10 ${
                       errors.password
                         ? "border-red-300 focus:border-red-400"
@@ -220,7 +259,8 @@ export default function Register() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    disabled={isLoading}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 disabled:opacity-50"
                   >
                     {showPassword ? (
                       <EyeOff className="w-4 h-4" />
@@ -244,6 +284,7 @@ export default function Register() {
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
                     placeholder="Ketik ulang password"
+                    disabled={isLoading}
                     className={`border-2 pr-10 ${
                       errors.confirmPassword
                         ? "border-red-300 focus:border-red-400"
@@ -253,7 +294,8 @@ export default function Register() {
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    disabled={isLoading}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 disabled:opacity-50"
                   >
                     {showConfirmPassword ? (
                       <EyeOff className="w-4 h-4" />
@@ -271,9 +313,10 @@ export default function Register() {
 
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 text-lg font-semibold"
+                disabled={isLoading}
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Daftar Sekarang
+                {isLoading ? "Memproses..." : "Daftar Sekarang"}
               </Button>
             </form>
 

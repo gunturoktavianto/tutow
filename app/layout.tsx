@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Providers } from "@/components/providers";
 import "./globals.css";
 import { Navigation } from "@/components/navigation";
 
@@ -14,10 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Tutow - Belajar Matematika Seru untuk Anak",
+  title: "Tutow - Interactive Math Learning for Kids",
   description:
-    "Aplikasi edukasi interaktif untuk anak SD belajar matematika dengan cara yang menyenangkan",
-  keywords: ["matematika", "edukasi", "anak", "SD", "belajar", "interaktif"],
+    "Fun and interactive math learning platform for elementary school students",
 };
 
 export default function RootLayout({
@@ -28,10 +28,12 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-gradient-to-br from-blue-50 to-purple-50`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Navigation />
-        <main className="min-h-screen">{children}</main>
+        <Providers>
+          <Navigation />
+          {children}
+        </Providers>
       </body>
     </html>
   );
