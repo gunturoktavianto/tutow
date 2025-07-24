@@ -20,7 +20,7 @@ import {
   Lock,
 } from "lucide-react";
 
-export default function BilanganMaterial() {
+export default function BilanganMaterial1_1Page() {
   // Mock data untuk courses dalam materi Bilangan - akan diganti dengan data real
   const courses = [
     {
