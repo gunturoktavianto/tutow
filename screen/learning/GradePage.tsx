@@ -43,6 +43,7 @@ export function GradePage({ gradeNumber }: GradePageProps) {
   const [materials, setMaterials] = useState<Material[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userProgress, setUserProgress] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchMaterials = async () => {
@@ -67,7 +68,14 @@ export function GradePage({ gradeNumber }: GradePageProps) {
         );
         const materialsData = await materialsResponse.json();
 
+        // Get user progress for this grade
+        const progressResponse = await fetch(
+          `/api/progress?gradeId=${grade.id}`
+        );
+        const progressData = await progressResponse.json();
+
         setMaterials(materialsData.materials);
+        setUserProgress(progressData.progress || []);
       } catch (err) {
         setError("Gagal memuat data");
         console.error("Error fetching materials:", err);
@@ -103,9 +111,23 @@ export function GradePage({ gradeNumber }: GradePageProps) {
     );
   }
 
-  // Mock progress calculation - in real app this would come from user progress data
   const getMaterialProgress = (material: Material) => {
-    return Math.floor(Math.random() * 101); // Random for demo
+    const materialProgress = userProgress.filter(
+      (progress) => progress.materialId === material.id && progress.completed
+    );
+
+    return material.courses.length > 0
+      ? Math.round((materialProgress.length / material.courses.length) * 100)
+      : 0;
+  };
+
+  const getCourseCompleted = (material: Material, courseIndex: number) => {
+    const course = material.courses[courseIndex];
+    if (!course) return false;
+
+    return userProgress.some(
+      (progress) => progress.courseId === course.id && progress.completed
+    );
   };
 
   const totalProgress =
@@ -171,7 +193,7 @@ export function GradePage({ gradeNumber }: GradePageProps) {
             (progress / 100) * material._count.courses
           );
           const isUnlocked =
-            index === 0 || getMaterialProgress(materials[index - 1]) > 50; // Simple unlock logic
+            index === 0 || getMaterialProgress(materials[index - 1]) > 50;
 
           return (
             <Card

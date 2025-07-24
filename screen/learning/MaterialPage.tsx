@@ -46,6 +46,7 @@ export function MaterialPage({ gradeNumber, materialId }: MaterialPageProps) {
   const [material, setMaterial] = useState<Material | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userProgress, setUserProgress] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchMaterial = async () => {
@@ -84,7 +85,14 @@ export function MaterialPage({ gradeNumber, materialId }: MaterialPageProps) {
         );
         const coursesData = await coursesResponse.json();
 
+        // Get user progress for this material
+        const progressResponse = await fetch(
+          `/api/progress?materialId=${targetMaterial.id}`
+        );
+        const progressData = await progressResponse.json();
+
         setMaterial(coursesData.material);
+        setUserProgress(progressData.progress || []);
       } catch (err) {
         setError("Gagal memuat data");
         console.error("Error fetching material:", err);
@@ -122,9 +130,13 @@ export function MaterialPage({ gradeNumber, materialId }: MaterialPageProps) {
     );
   }
 
-  // Mock completion status - in real app this would come from user progress data
   const getCourseCompleted = (courseIndex: number) => {
-    return courseIndex < 2; // First 2 courses completed for demo
+    const course = material.courses[courseIndex];
+    if (!course) return false;
+
+    return userProgress.some(
+      (progress) => progress.courseId === course.id && progress.completed
+    );
   };
 
   const totalCompleted = material.courses.filter((_, index) =>
