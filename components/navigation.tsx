@@ -36,6 +36,7 @@ import {
   LogOut,
   Menu,
   X,
+  Crown,
 } from "lucide-react";
 
 export function Navigation() {
@@ -71,6 +72,7 @@ export function Navigation() {
     { href: "/dashboard", label: "Beranda", icon: Home },
     { href: "/learning", label: "Belajar", icon: BookOpen },
     { href: "/exercise", label: "Latihan", icon: Trophy },
+    { href: "/leaderboard", label: "Leaderboard", icon: Crown },
     { href: "/games", label: "Permainan", icon: Gamepad2 },
   ];
 
