@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
@@ -64,6 +64,8 @@ export function Navigation() {
   }
 
   const user = session?.user as ExtendedUser;
+  const currentXP = user?.xp ?? 0;
+  const currentGold = user?.gold ?? 0;
 
   const navItems = [
     { href: "/dashboard", label: "Beranda", icon: Home },
@@ -117,14 +119,14 @@ export function Navigation() {
                     className="bg-yellow-100 text-yellow-800 border-yellow-300"
                   >
                     <Coins className="w-3 h-3 mr-1" />
-                    {user.gold || 0}
+                    {currentGold}
                   </Badge>
                   <Badge
                     variant="secondary"
                     className="bg-blue-100 text-blue-800 border-blue-300"
                   >
                     <Star className="w-3 h-3 mr-1" />
-                    {user.xp || 0} XP
+                    {currentXP} XP
                   </Badge>
                 </div>
 
@@ -163,11 +165,11 @@ export function Navigation() {
                       <div className="flex items-center space-x-2 mt-2">
                         <Badge variant="outline" className="text-xs">
                           <Star className="w-3 h-3 mr-1" />
-                          {user.xp || 0} XP
+                          {currentXP} XP
                         </Badge>
                         <Badge variant="outline" className="text-xs">
                           <Coins className="w-3 h-3 mr-1" />
-                          {user.gold || 0}
+                          {currentGold}
                         </Badge>
                       </div>
                     </div>

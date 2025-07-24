@@ -1,3 +1,7 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import {
   Card,
@@ -11,12 +15,88 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, Star, CheckCircle } from "lucide-react";
 
+interface ExtendedUser {
+  id: string;
+  email: string;
+  name?: string | null;
+  username?: string | null;
+  image?: string | null;
+  xp?: number;
+  gold?: number;
+  currentGrade?: number;
+}
+
 export default function Learning() {
-  // Mock data - akan diganti dengan data real dari database
-  const userProgress = {
+  const { data: session, status } = useSession();
+  const [userProgress, setUserProgress] = useState({
     currentGrade: 1,
-    totalXP: 1250,
-  };
+    totalXP: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  const fetchUserData = useCallback(async () => {
+    if (status === "loading") return;
+
+    try {
+      // Fetch fresh data from API to ensure we have the latest XP
+      const response = await fetch("/api/user/profile");
+      if (response.ok) {
+        const data = await response.json();
+        setUserProgress({
+          currentGrade: data.user.currentGrade || 1,
+          totalXP: data.user.xp || 0,
+        });
+      } else if (session?.user) {
+        // Fallback to session data if API fails
+        const user = session.user as ExtendedUser;
+        setUserProgress({
+          currentGrade: user.currentGrade || 1,
+          totalXP: user.xp || 0,
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      // Fallback to session data
+      if (session?.user) {
+        const user = session.user as ExtendedUser;
+        setUserProgress({
+          currentGrade: user.currentGrade || 1,
+          totalXP: user.xp || 0,
+        });
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [session, status]);
+
+  useEffect(() => {
+    fetchUserData();
+  }, [fetchUserData]);
+
+  // Refresh data when the page becomes visible (user returns from course)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible" && session?.user) {
+        fetchUserData();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [session, fetchUserData]);
+
+  if (status === "loading" || loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Memuat data...</p>
+        </div>
+      </div>
+    );
+  }
 
   const grades = [
     {

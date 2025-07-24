@@ -226,8 +226,9 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Update user XP if course is completed
-    if (completed) {
+    // Update user XP if course is completed (only if not already completed)
+    let xpEarned = 0;
+    if (completed && !existingProgress?.completed) {
       await prisma.user.update({
         where: { id: userId },
         data: {
@@ -236,6 +237,7 @@ export async function POST(request: NextRequest) {
           },
         },
       });
+      xpEarned = course.xpReward;
     }
 
     console.log("Course progress updated successfully:", {
@@ -243,13 +245,13 @@ export async function POST(request: NextRequest) {
       courseId: courseId,
       completed: completed,
       score: score,
-      xpEarned: completed ? course.xpReward : 0,
+      xpEarned: xpEarned,
     });
 
     return NextResponse.json({
       success: true,
       progress,
-      xpEarned: completed ? course.xpReward : 0,
+      xpEarned: xpEarned,
     });
   } catch (error) {
     console.error("Error updating progress:", error);
