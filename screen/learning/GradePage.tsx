@@ -89,10 +89,10 @@ export function GradePage({ gradeNumber }: GradePageProps) {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[80vh]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Memuat materi...</p>
+          <div className="animate-bounce text-7xl mb-4">🔄</div>
+          <p className="text-xl font-bold">Tunggu sebentar ya...</p>
         </div>
       </div>
     );
@@ -100,11 +100,14 @@ export function GradePage({ gradeNumber }: GradePageProps) {
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[80vh]">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600">{error}</h1>
+          <div className="text-7xl mb-4">😢</div>
+          <h1 className="text-2xl font-bold text-red-600 mb-4">{error}</h1>
           <Link href="/learning">
-            <Button className="mt-4">Kembali ke Learning</Button>
+            <Button className="mt-4 text-lg px-6 py-6 rounded-full">
+              Kembali
+            </Button>
           </Link>
         </div>
       </div>
@@ -121,15 +124,6 @@ export function GradePage({ gradeNumber }: GradePageProps) {
       : 0;
   };
 
-  const getCourseCompleted = (material: Material, courseIndex: number) => {
-    const course = material.courses[courseIndex];
-    if (!course) return false;
-
-    return userProgress.some(
-      (progress) => progress.courseId === course.id && progress.completed
-    );
-  };
-
   const totalProgress =
     materials.length > 0
       ? Math.round(
@@ -140,143 +134,159 @@ export function GradePage({ gradeNumber }: GradePageProps) {
         )
       : 0;
 
+  // Emojis for material themes
+  const materialEmojis = [
+    "🔢",
+    "➕",
+    "➖",
+    "✖️",
+    "➗",
+    "📏",
+    "📐",
+    "🧠",
+    "🎯",
+    "🎲",
+  ];
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Breadcrumb */}
-      <div className="flex items-center space-x-2 text-sm text-gray-600 mb-4">
-        <Link href="/learning" className="hover:text-blue-600">
-          Belajar
+    <div className="container mx-auto px-4 py-6">
+      {/* Simple Header */}
+      <div className="mb-6 text-center">
+        <Link href="/learning" className="inline-block mb-4">
+          <Button variant="outline" size="lg" className="rounded-full">
+            ← Kembali
+          </Button>
         </Link>
-        <ChevronRight className="w-4 h-4" />
-        <span className="font-medium">Kelas {gradeNumber}</span>
-      </div>
-
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">
-              📚 Matematika Kelas {gradeNumber}
-            </h1>
-            <p className="text-xl text-gray-600">
-              Dasar-dasar matematika yang menyenangkan
-            </p>
-          </div>
-          <div className="text-6xl">🎯</div>
-        </div>
-
-        {/* Overall Progress */}
-        <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-6 text-white">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-xl font-bold">
-                Progress Kelas {gradeNumber}
-              </h3>
-              <p className="text-blue-100">
-                Kamu sudah menyelesaikan {totalProgress}% dari semua materi!
-              </p>
-            </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold">{totalProgress}%</div>
-              <div className="text-sm text-blue-100">Selesai</div>
-            </div>
-          </div>
-          <Progress value={totalProgress} className="h-2 bg-white/20" />
+        <div className="flex justify-center items-center gap-4">
+          <h1 className="text-5xl font-bold">Kelas {gradeNumber}</h1>
+          <div className="text-6xl">📚</div>
         </div>
       </div>
 
-      {/* Materials Grid */}
-      <div className="grid md:grid-cols-2 gap-6">
+      {/* Progress Bar */}
+      <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-3xl p-6 mb-8 max-w-xl mx-auto shadow-lg">
+        <div className="flex items-center gap-4 mb-3">
+          <div className="text-5xl">🚀</div>
+          <div className="text-white text-xl font-bold">
+            {totalProgress}% Selesai
+          </div>
+        </div>
+        <Progress
+          value={totalProgress}
+          className="h-6 bg-white/20 rounded-full"
+        />
+      </div>
+
+      {/* Materials Grid - Visual Card Style for Kids */}
+      <div className="grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {materials.map((material, index) => {
           const progress = getMaterialProgress(material);
-          const completedLessons = Math.floor(
-            (progress / 100) * material._count.courses
-          );
           const isUnlocked =
             index === 0 || getMaterialProgress(materials[index - 1]) > 50;
+          const emoji = materialEmojis[index % materialEmojis.length];
+
+          // Calculate stars based on progress
+          const totalStars = 3;
+          const earnedStars = Math.floor(progress / (100 / totalStars));
 
           return (
-            <Card
+            <Link
               key={material.id}
-              className={`border-2 transition-all duration-300 ${
-                isUnlocked
-                  ? "border-gray-200 hover:border-blue-300 cursor-pointer"
-                  : "border-gray-100 bg-gray-50"
-              }`}
+              href={
+                isUnlocked ? `/learning/${gradeNumber}/${material.name}` : "#"
+              }
+              className={!isUnlocked ? "pointer-events-none" : ""}
             >
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div
-                      className={`w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold ${
-                        index % 4 === 0
-                          ? "bg-blue-500"
-                          : index % 4 === 1
-                          ? "bg-green-500"
-                          : index % 4 === 2
-                          ? "bg-purple-500"
-                          : "bg-orange-500"
-                      }`}
-                    >
-                      {index + 1}
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg">
-                        {material.displayName}
-                      </CardTitle>
-                      <CardDescription>{material.description}</CardDescription>
+              <div
+                className={`
+                relative aspect-square rounded-3xl overflow-hidden shadow-lg transition-all duration-300
+                ${
+                  isUnlocked
+                    ? "bg-gradient-to-br from-white to-blue-100 hover:shadow-xl transform hover:-translate-y-2"
+                    : "bg-gray-200 opacity-70"
+                }
+              `}
+              >
+                {!isUnlocked && (
+                  <div className="absolute inset-0 bg-gray-100/80 backdrop-blur-sm flex items-center justify-center z-10">
+                    <div className="text-center">
+                      <div className="text-6xl mb-2">🔒</div>
+                      <p className="text-lg font-bold">Belum Terbuka</p>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    {isUnlocked ? (
-                      progress === 100 ? (
-                        <CheckCircle className="w-6 h-6 text-green-500" />
-                      ) : (
-                        <div className="w-6 h-6 rounded-full border-2 border-blue-500 flex items-center justify-center">
-                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                )}
+
+                <div className="h-full p-6 flex flex-col justify-between">
+                  {/* Top Section */}
+                  <div className="text-center">
+                    <div className="text-7xl mb-4">{emoji}</div>
+                    <h2 className="text-2xl font-bold mb-1">
+                      {material.displayName}
+                    </h2>
+
+                    {/* Simplified Progress Bar for Kids */}
+                    {isUnlocked && (
+                      <div className="mt-4 relative h-6 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-blue-400 to-purple-500 rounded-full"
+                          style={{ width: `${progress}%` }}
+                        >
+                          {progress > 30 && (
+                            <div className="absolute inset-0 flex items-center justify-center text-white font-bold">
+                              {progress}%
+                            </div>
+                          )}
                         </div>
-                      )
-                    ) : (
-                      <Lock className="w-6 h-6 text-gray-400" />
+                        {progress <= 30 && (
+                          <div className="absolute inset-0 flex items-center justify-center text-gray-700 font-bold">
+                            {progress}%
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">Progress</span>
-                    <span className="font-medium">{progress}%</span>
-                  </div>
-                  <Progress value={progress} className="h-2" />
 
-                  <div className="flex items-center justify-between text-sm text-gray-600">
-                    <div className="flex items-center space-x-1">
-                      <BookOpen className="w-4 h-4" />
-                      <span>
-                        {completedLessons}/{material._count.courses} pelajaran
-                      </span>
+                  {/* Bottom Section */}
+                  <div className="mt-4 flex justify-center">
+                    <div
+                      className={`
+                      rounded-full px-6 py-3 font-bold text-white text-center text-lg
+                      ${
+                        isUnlocked
+                          ? progress === 100
+                            ? "bg-green-500"
+                            : progress > 0
+                            ? "bg-blue-500"
+                            : "bg-purple-500"
+                          : "bg-gray-400"
+                      }
+                    `}
+                    >
+                      {progress === 100
+                        ? "Selesai! 🎉"
+                        : progress > 0
+                        ? "Lanjut 👉"
+                        : "Mulai 🚀"}
                     </div>
-                    <Badge variant="outline" className="text-xs">
-                      <Users className="w-3 h-3 mr-1" />
-                      1.2k siswa
-                    </Badge>
                   </div>
-
-                  {isUnlocked ? (
-                    <Link href={`/learning/${gradeNumber}/${material.name}`}>
-                      <Button className="w-full mt-4">
-                        {progress === 0 ? "Mulai Belajar" : "Lanjutkan"}
-                      </Button>
-                    </Link>
-                  ) : (
-                    <Button disabled className="w-full mt-4">
-                      Selesaikan materi sebelumnya
-                    </Button>
-                  )}
                 </div>
-              </CardContent>
-            </Card>
+
+                {/* Progress Indicator in Corner */}
+                {isUnlocked && progress > 0 && (
+                  <div className="absolute top-3 right-3 bg-white rounded-full px-3 py-1 shadow-md">
+                    <div className="text-sm font-bold">
+                      {material.courses.length > 0
+                        ? `${
+                            userProgress.filter(
+                              (p) => p.materialId === material.id && p.completed
+                            ).length
+                          }/${material.courses.length}`
+                        : "0/0"}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </Link>
           );
         })}
       </div>

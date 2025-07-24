@@ -120,9 +120,13 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  let body: any;
+  let userId: string | undefined;
+  let session: any;
+
   try {
     console.log("POST /api/progress - Starting request");
-    const session = await getServerSession(authOptions);
+    session = await getServerSession(authOptions);
     console.log("Full session object:", JSON.stringify(session, null, 2));
     console.log("Session check:", {
       hasSession: !!session,
@@ -133,7 +137,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Try to get user ID from session, or fallback to finding by email
-    let userId = session?.user?.id;
+    userId = session?.user?.id;
 
     if (!userId && session?.user?.email) {
       console.log(
@@ -156,7 +160,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await request.json();
+    body = await request.json();
     console.log("Request body:", body);
     const { courseId, completed, score } = body;
 

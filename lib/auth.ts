@@ -73,7 +73,7 @@ export const authOptions: NextAuthOptions = {
 
       if (user) {
         token.id = user.id;
-        token.username = user.username;
+        token.username = user.username ?? undefined;
         token.school = user.school;
         token.currentGrade = user.currentGrade;
         token.xp = user.xp;

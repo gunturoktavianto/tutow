@@ -1,15 +1,20 @@
 import { MaterialPage } from "@/screen";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     grade: string;
     material: string;
-  };
+  }>;
 }
 
-export default function Page({ params }: PageProps) {
-  const gradeNumber = parseInt(params.grade);
+export default async function Page({ params }: PageProps) {
+  const resolvedParams = await params;
+  const gradeNumber = parseInt(resolvedParams.grade);
+
   return (
-    <MaterialPage gradeNumber={gradeNumber} materialId={params.material} />
+    <MaterialPage
+      gradeNumber={gradeNumber}
+      materialId={resolvedParams.material}
+    />
   );
 }
