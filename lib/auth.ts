@@ -43,6 +43,10 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           username: user.username,
           image: user.image,
+          school: user.school,
+          currentGrade: user.currentGrade,
+          xp: user.xp,
+          gold: user.gold,
         };
       },
     }),
@@ -51,16 +55,49 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
+        token.id = user.id;
         token.username = user.username;
+        token.school = user.school;
+        token.currentGrade = user.currentGrade;
+        token.xp = user.xp;
+        token.gold = user.gold;
       }
+
+      if (trigger === "update") {
+        const updatedUser = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          select: {
+            name: true,
+            username: true,
+            school: true,
+            currentGrade: true,
+            xp: true,
+            gold: true,
+          },
+        });
+
+        if (updatedUser) {
+          token.name = updatedUser.name;
+          token.username = updatedUser.username;
+          token.school = updatedUser.school;
+          token.currentGrade = updatedUser.currentGrade;
+          token.xp = updatedUser.xp;
+          token.gold = updatedUser.gold;
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {
       if (token) {
-        session.user.id = token.sub!;
+        session.user.id = token.id as string;
         session.user.username = token.username as string;
+        session.user.school = token.school as string;
+        session.user.currentGrade = token.currentGrade as number;
+        session.user.xp = token.xp as number;
+        session.user.gold = token.gold as number;
       }
       return session;
     },

@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { prisma } from "@/lib/prisma";
 
 const registerSchema = z.object({
-  name: z.string().min(1, "Nama lengkap harus diisi"),
+  name: z.string().min(1, "Nama harus diisi"),
   email: z.string().email("Format email tidak valid"),
   username: z
     .string()
@@ -13,81 +13,79 @@ const registerSchema = z.object({
   school: z.string().optional(),
 });
 
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    const body = await request.json();
-
+    const body = await req.json();
     const validatedData = registerSchema.parse(body);
 
-    const existingUser = await prisma.user.findFirst({
-      where: {
-        OR: [
-          { email: validatedData.email },
-          { username: validatedData.username },
-        ],
-      },
+    // Check if email already exists
+    const existingEmail = await prisma.user.findUnique({
+      where: { email: validatedData.email },
     });
 
-    if (existingUser) {
-      if (existingUser.email === validatedData.email) {
-        return NextResponse.json(
-          { error: "Email sudah terdaftar" },
-          { status: 400 }
-        );
-      }
-      if (existingUser.username === validatedData.username) {
-        return NextResponse.json(
-          { error: "Username sudah digunakan" },
-          { status: 400 }
-        );
-      }
+    if (existingEmail) {
+      return NextResponse.json(
+        { error: "Email sudah terdaftar" },
+        { status: 400 }
+      );
     }
 
-    const hashedPassword = await bcrypt.hash(validatedData.password, 10);
+    // Check if username already exists
+    const existingUsername = await prisma.user.findUnique({
+      where: { username: validatedData.username },
+    });
 
+    if (existingUsername) {
+      return NextResponse.json(
+        { error: "Username sudah digunakan" },
+        { status: 400 }
+      );
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(validatedData.password, 12);
+
+    // Create user
     const user = await prisma.user.create({
       data: {
         name: validatedData.name,
         email: validatedData.email,
         username: validatedData.username,
         password: hashedPassword,
-        school: validatedData.school || null,
+        school: validatedData.school,
         xp: 0,
-        gold: 100,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        username: true,
-        school: true,
-        xp: true,
-        gold: true,
-        createdAt: true,
+        gold: 100, // Starting gold
       },
     });
 
+    // Create initial garden for user
     await prisma.garden.create({
       data: {
         userId: user.id,
         pots: [
-          { id: 1, plant: null, waterLevel: 0, lastWatered: null },
-          { id: 2, plant: null, waterLevel: 0, lastWatered: null },
-          { id: 3, plant: null, waterLevel: 0, lastWatered: null },
-          { id: 4, plant: null, waterLevel: 0, lastWatered: null },
-          { id: 5, plant: null, waterLevel: 0, lastWatered: null },
+          { plantId: null, stage: 0, waterLevel: 0 },
+          { plantId: null, stage: 0, waterLevel: 0 },
+          { plantId: null, stage: 0, waterLevel: 0 },
+          { plantId: null, stage: 0, waterLevel: 0 },
+          { plantId: null, stage: 0, waterLevel: 0 },
         ],
       },
     });
 
-    return NextResponse.json({
-      message: "Akun berhasil dibuat",
-      user,
-    });
+    // Return success (without password)
+    const { password: _, ...userWithoutPassword } = user;
+
+    return NextResponse.json(
+      {
+        message: "Akun berhasil dibuat",
+        user: userWithoutPassword,
+      },
+      { status: 201 }
+    );
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: error.issues[0].message },
+        { error: error.errors[0].message },
         { status: 400 }
       );
     }

@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Star, Users, CheckCircle, Lock } from "lucide-react";
+import { BookOpen, Star, CheckCircle } from "lucide-react";
 
 export default function Learning() {
   // Mock data - akan diganti dengan data real dari database
@@ -26,8 +26,6 @@ export default function Learning() {
       totalMaterials: 4,
       completedMaterials: 2,
       progress: 50,
-      isUnlocked: true,
-      students: 1200,
       color: "from-blue-400 to-blue-600",
     },
     {
@@ -37,8 +35,6 @@ export default function Learning() {
       totalMaterials: 5,
       completedMaterials: 0,
       progress: 0,
-      isUnlocked: false,
-      students: 980,
       color: "from-green-400 to-green-600",
     },
     {
@@ -48,8 +44,6 @@ export default function Learning() {
       totalMaterials: 6,
       completedMaterials: 0,
       progress: 0,
-      isUnlocked: false,
-      students: 850,
       color: "from-purple-400 to-purple-600",
     },
     {
@@ -59,8 +53,6 @@ export default function Learning() {
       totalMaterials: 7,
       completedMaterials: 0,
       progress: 0,
-      isUnlocked: false,
-      students: 720,
       color: "from-pink-400 to-pink-600",
     },
     {
@@ -70,8 +62,6 @@ export default function Learning() {
       totalMaterials: 8,
       completedMaterials: 0,
       progress: 0,
-      isUnlocked: false,
-      students: 640,
       color: "from-orange-400 to-orange-600",
     },
     {
@@ -81,8 +71,6 @@ export default function Learning() {
       totalMaterials: 9,
       completedMaterials: 0,
       progress: 0,
-      isUnlocked: false,
-      students: 580,
       color: "from-red-400 to-red-600",
     },
   ];
@@ -121,22 +109,14 @@ export default function Learning() {
         {grades.map((grade) => (
           <Card
             key={grade.id}
-            className={`relative overflow-hidden border-2 transition-all duration-300 hover:shadow-lg ${
-              grade.isUnlocked
-                ? "border-blue-200 hover:border-blue-300 cursor-pointer"
-                : "border-gray-200 opacity-60"
-            }`}
+            className="relative overflow-hidden border-2 transition-all duration-300 hover:shadow-lg border-blue-200 hover:border-blue-300 cursor-pointer"
           >
             {/* Gradient Header */}
             <div className={`h-20 bg-gradient-to-r ${grade.color} relative`}>
               <div className="absolute inset-0 bg-black/10"></div>
               <div className="relative z-10 flex items-center justify-between h-full px-6">
                 <h3 className="text-2xl font-bold text-white">{grade.name}</h3>
-                {grade.isUnlocked ? (
-                  <CheckCircle className="w-8 h-8 text-white" />
-                ) : (
-                  <Lock className="w-8 h-8 text-white/70" />
-                )}
+                <CheckCircle className="w-8 h-8 text-white" />
               </div>
             </div>
 
@@ -164,40 +144,21 @@ export default function Learning() {
               </div>
 
               {/* Stats */}
-              <div className="flex items-center justify-between text-sm text-gray-600">
+              <div className="flex items-center text-sm text-gray-600">
                 <div className="flex items-center space-x-1">
                   <BookOpen className="w-4 h-4" />
                   <span>{grade.totalMaterials} Materi</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <Users className="w-4 h-4" />
-                  <span>{grade.students.toLocaleString()} Siswa</span>
                 </div>
               </div>
 
               {/* Action Button */}
               <div className="pt-2">
-                {grade.isUnlocked ? (
-                  <Link href={`/learning/${grade.id}`}>
-                    <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-                      {grade.progress > 0
-                        ? "Lanjutkan Belajar"
-                        : "Mulai Belajar"}
-                    </Button>
-                  </Link>
-                ) : (
-                  <Button disabled className="w-full">
-                    <Lock className="w-4 h-4 mr-2" />
-                    Terkunci
+                <Link href={`/learning/${grade.id}`}>
+                  <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                    {grade.progress > 0 ? "Lanjutkan Belajar" : "Mulai Belajar"}
                   </Button>
-                )}
+                </Link>
               </div>
-
-              {!grade.isUnlocked && (
-                <p className="text-xs text-gray-500 text-center">
-                  Selesaikan Kelas {grade.id - 1} untuk membuka kelas ini
-                </p>
-              )}
             </CardContent>
           </Card>
         ))}

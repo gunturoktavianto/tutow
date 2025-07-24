@@ -44,6 +44,7 @@ model User {
   password      String?
   username      String    @unique
   school        String?
+  currentGrade  Int?      // Kelas saat ini (1-6)
   emailVerified DateTime?
   image         String?
   xp            Int       @default(0)

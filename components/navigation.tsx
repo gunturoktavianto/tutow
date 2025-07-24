@@ -173,10 +173,12 @@ export function Navigation() {
                         </Badge>
                       </div>
                     </div>
-                    <DropdownMenuItem>
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Profil Saya</span>
-                    </DropdownMenuItem>
+                    <Link href="/profile">
+                      <DropdownMenuItem>
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Profil Saya</span>
+                      </DropdownMenuItem>
+                    </Link>
                     <DropdownMenuItem>
                       <Settings className="mr-2 h-4 w-4" />
                       <span>Pengaturan</span>
