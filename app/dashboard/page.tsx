@@ -29,48 +29,41 @@ import {
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
-  const [userStats, setUserStats] = useState({
-    name: "Adik Pintar",
-    xp: 0,
-    gold: 0,
-    currentGrade: 1,
-  });
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchUserStats = async () => {
+    const fetchDashboardData = async () => {
       if (status === "authenticated" && session?.user) {
         try {
-          const response = await fetch("/api/user/profile");
+          setLoading(true);
+          const response = await fetch("/api/dashboard");
           if (response.ok) {
             const data = await response.json();
-            setUserStats({
-              name: data.user.name || "Adik Pintar",
-              xp: data.user.xp || 0,
-              gold: data.user.gold || 0,
-              currentGrade: data.user.currentGrade || 1,
-            });
+            setDashboardData(data);
+          } else {
+            console.error(
+              "Error fetching dashboard data:",
+              response.statusText
+            );
           }
         } catch (error) {
-          console.error("Error fetching user stats:", error);
-          // Fallback to session data
-          if (session?.user) {
-            setUserStats({
-              name: session.user.name || "Adik Pintar",
-              xp: session.user.xp || 0,
-              gold: session.user.gold || 0,
-              currentGrade: session.user.currentGrade || 1,
-            });
-          }
+          console.error("Error fetching dashboard data:", error);
+        } finally {
+          setLoading(false);
         }
       }
     };
 
-    fetchUserStats();
+    fetchDashboardData();
 
     // Also refresh when page becomes visible (user returns from another tab)
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible" && status === "authenticated") {
-        fetchUserStats();
+      if (
+        document.visibilityState === "visible" &&
+        status === "authenticated"
+      ) {
+        fetchDashboardData();
       }
     };
 
@@ -81,67 +74,31 @@ export default function Dashboard() {
     };
   }, [status, session]);
 
-  // Mock data - akan diganti dengan data real dari database
-  const user = {
-    name: userStats.name,
-    xp: userStats.xp,
-    gold: userStats.gold,
-    currentGrade: userStats.currentGrade,
-    streak: 5,
-    totalLessonsCompleted: 23,
-    totalExercisesCompleted: 45,
-  };
+  if (status === "loading" || loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Memuat dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
-  const recentBadges = [
-    { name: "Penjumlahan Master", icon: "🏆", earnedAt: "2 hari lalu" },
-    { name: "Rajin Belajar", icon: "⭐", earnedAt: "1 minggu lalu" },
-  ];
+  if (!dashboardData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Gagal memuat data dashboard.</p>
+          <Button onClick={() => window.location.reload()} className="mt-4">
+            Coba Lagi
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
-  const grade1Materials = [
-    {
-      id: "bilangan",
-      name: "Bilangan 1-20",
-      progress: 80,
-      totalLessons: 15,
-      completedLessons: 12,
-      color: "blue",
-    },
-    {
-      id: "penjumlahan",
-      name: "Penjumlahan",
-      progress: 60,
-      totalLessons: 20,
-      completedLessons: 12,
-      color: "green",
-    },
-    {
-      id: "pengurangan",
-      name: "Pengurangan",
-      progress: 25,
-      totalLessons: 18,
-      completedLessons: 5,
-      color: "purple",
-    },
-    {
-      id: "bangun-datar",
-      name: "Bangun Datar",
-      progress: 0,
-      totalLessons: 12,
-      completedLessons: 0,
-      color: "orange",
-    },
-  ];
-
-  const dailyTasks = [
-    { task: "Selesaikan 1 pelajaran", progress: 1, target: 1, completed: true },
-    {
-      task: "Kerjakan 5 latihan soal",
-      progress: 3,
-      target: 5,
-      completed: false,
-    },
-    { task: "Siram tanaman di kebun", progress: 1, target: 1, completed: true },
-  ];
+  const { user, materials, recentBadges, dailyTasks } = dashboardData;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
@@ -216,7 +173,7 @@ export default function Dashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {grade1Materials.map((material) => (
+                {materials.map((material: any) => (
                   <div
                     key={material.id}
                     className="border rounded-lg p-4 hover:shadow-md transition-shadow"
@@ -304,7 +261,7 @@ export default function Dashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {dailyTasks.map((task, index) => (
+                {dailyTasks.map((task: any, index: number) => (
                   <div
                     key={index}
                     className="flex items-center justify-between"
@@ -345,7 +302,7 @@ export default function Dashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {recentBadges.map((badge, index) => (
+                {recentBadges.map((badge: any, index: number) => (
                   <div key={index} className="flex items-center space-x-3">
                     <div className="text-2xl">{badge.icon}</div>
                     <div>

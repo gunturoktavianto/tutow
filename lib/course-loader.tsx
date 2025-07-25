@@ -1,5 +1,6 @@
 import React, { ComponentType } from "react";
 import { getCourseComponent, CourseMetadata } from "./course-registry";
+import { lazy } from "react";
 
 export interface CourseLoaderProps {
   courseId: string;
@@ -11,7 +12,7 @@ export interface CourseLoaderProps {
 export interface CourseComponentProps {
   courseId: string;
   courseData?: any;
-  metadata?: CourseMetadata;
+  mode?: "material" | "exercise";
 }
 
 export function CourseLoader({
@@ -63,12 +64,69 @@ export function DefaultCourseFallback(): React.ReactElement {
   );
 }
 
-export function loadCourseComponent(
-  courseId: string
-): ComponentType<any> | null {
-  const courseEntry = getCourseComponent(courseId);
-  return courseEntry ? courseEntry.component : null;
-}
+export const courseComponents = {
+  course1_1_bilangan: lazy(() =>
+    import("@/screen/courses/course1_1_bilangan").then((mod) => ({
+      default: mod.Course1_1_Bilangan,
+    }))
+  ),
+  course1_2_ganjil_genap_urutan: lazy(() =>
+    import("@/screen/courses/course1_2_ganjil_genap_urutan").then((mod) => ({
+      default: mod.Course1_2_GanjilGenapUrutan,
+    }))
+  ),
+  course1_3_pola_perbandingan: lazy(() =>
+    import("@/screen/courses/course1_3_pola_perbandingan").then((mod) => ({
+      default: mod.Course1_3_PolaPerbandingan,
+    }))
+  ),
+  course1_4_place_value: lazy(() =>
+    import("@/screen/courses/course1_4_place_value").then((mod) => ({
+      default: mod.Course1_4_PlaceValue,
+    }))
+  ),
+  course2_1_number_bonds: lazy(() =>
+    import("@/screen/courses/course2_1_number_bonds").then((mod) => ({
+      default: mod.Course1_2_NumberBonds,
+    }))
+  ),
+  course2_2_addition_strategies: lazy(() =>
+    import("@/screen/courses/course2_2_addition_strategies").then((mod) => ({
+      default: mod.Course1_2_AdditionStrategies,
+    }))
+  ),
+};
+
+export const loadCourseComponent = (courseId: string) => {
+  return courseComponents[courseId as keyof typeof courseComponents];
+};
+
+export const MaterialComponents = {
+  course1_1_bilangan: lazy(() =>
+    import("@/screen/materials").then((mod) => ({
+      default: mod.Course1_1_BilanganMaterial,
+    }))
+  ),
+  course1_2_ganjil_genap_urutan: lazy(() =>
+    import("@/screen/materials").then((mod) => ({
+      default: mod.Course1_2_GanjilGenapUrutanMaterial,
+    }))
+  ),
+  course1_3_pola_perbandingan: lazy(() =>
+    import("@/screen/materials").then((mod) => ({
+      default: mod.Course1_3_PolaPerbandinganMaterial,
+    }))
+  ),
+  course2_1_number_bonds: lazy(() =>
+    import("@/screen/materials").then((mod) => ({
+      default: mod.Course2_1_NumberBondsMaterial,
+    }))
+  ),
+};
+
+export const loadMaterialComponent = (courseId: string) => {
+  return MaterialComponents[courseId as keyof typeof MaterialComponents];
+};
 
 export function hasCourseComponent(courseId: string): boolean {
   return getCourseComponent(courseId) !== null;
