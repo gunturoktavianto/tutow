@@ -16,6 +16,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
+import { ExerciseProgress } from "@/components/exercise-progress";
+import { AchievementBadges } from "@/components/achievement-badges";
 import {
   User,
   School,
@@ -167,28 +169,6 @@ export default function ProfilePage() {
   }
 
   const user = userData || session.user;
-
-  // Mock achievements data
-  const achievements = [
-    {
-      name: "Penjumlahan Master",
-      icon: "🏆",
-      description: "Menyelesaikan semua materi penjumlahan",
-      earnedAt: "2 hari lalu",
-    },
-    {
-      name: "Rajin Belajar",
-      icon: "⭐",
-      description: "Belajar 7 hari berturut-turut",
-      earnedAt: "1 minggu lalu",
-    },
-    {
-      name: "Explorer",
-      icon: "🎯",
-      description: "Mencoba semua fitur aplikasi",
-      earnedAt: "2 minggu lalu",
-    },
-  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
@@ -387,6 +367,41 @@ export default function ProfilePage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Exercise Progress */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Trophy className="w-5 h-5 text-green-600" />
+                  <span>Progress Latihan</span>
+                </CardTitle>
+                <CardDescription>
+                  Statistik lengkap hasil latihan soal kamu
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ExerciseProgress
+                  showMaterialStats={true}
+                  showRecentSessions={true}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Achievement Badges */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Award className="w-5 h-5 text-purple-600" />
+                  <span>Pencapaian & Badge</span>
+                </CardTitle>
+                <CardDescription>
+                  Badge yang sudah kamu raih dan progress yang sedang berjalan
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AchievementBadges showProgress={true} limit={12} />
+              </CardContent>
+            </Card>
           </div>
 
           {/* Sidebar */}
@@ -427,29 +442,16 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
 
-            {/* Achievements */}
+            {/* Recent Achievements */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Award className="w-5 h-5 text-purple-600" />
-                  <span>Pencapaian Terbaru</span>
+                  <span>Badge Terbaru</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                {achievements.map((achievement, index) => (
-                  <div key={index} className="flex items-start space-x-3">
-                    <div className="text-2xl">{achievement.icon}</div>
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">{achievement.name}</p>
-                      <p className="text-xs text-gray-600">
-                        {achievement.description}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {achievement.earnedAt}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+              <CardContent>
+                <AchievementBadges limit={3} compact={true} />
               </CardContent>
             </Card>
 

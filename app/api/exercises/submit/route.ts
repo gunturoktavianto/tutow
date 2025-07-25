@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { AchievementService } from "@/lib/services/achievement-service";
 
 export async function POST(request: NextRequest) {
   try {
@@ -128,6 +129,10 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    const newBadges = await AchievementService.checkAndAwardAchievements(
+      session.user.id
+    );
+
     return NextResponse.json({
       success: true,
       results: {
@@ -138,6 +143,7 @@ export async function POST(request: NextRequest) {
         accuracy: Math.round(accuracy),
         sessionId: exerciseSession.id,
       },
+      newBadges,
     });
   } catch (error) {
     console.error("Exercise submit API error:", error);
