@@ -100,8 +100,20 @@ export function Course1_1_BilanganMaterial({ courseId }: CourseComponentProps) {
   >({});
   const aiTutorRef = useRef<AITutorRef>(null);
 
-  const { isSessionActive, startSession, sendTextMessage, status } =
-    useOpenAIRealtime("alloy");
+  const {
+    isSessionActive,
+    startSession,
+    sendTextMessage,
+    status,
+    stopSession,
+  } = useOpenAIRealtime("alloy");
+
+  // Function to stop current narration
+  const stopCurrentNarration = () => {
+    setIsPlaying(false);
+    // Note: OpenAI Realtime doesn't have a direct stop method for ongoing speech
+    // The audio will naturally end when the current response completes
+  };
 
   const slides: MaterialSlide[] = [
     {
@@ -417,15 +429,45 @@ export function Course1_1_BilanganMaterial({ courseId }: CourseComponentProps) {
 
   const nextSlide = () => {
     if (currentSlide < slides.length - 1) {
-      setCurrentSlide(currentSlide + 1);
+      stopCurrentNarration(); // Stop current narration
+      const newSlideIndex = currentSlide + 1;
+      setCurrentSlide(newSlideIndex);
+
+      // Auto-play narration for the new slide
+      const newSlideData = slides[newSlideIndex];
+      if (newSlideData.narration) {
+        setTimeout(() => {
+          speakText(newSlideData.narration!);
+        }, 500); // Small delay to let slide transition complete
+      }
     }
   };
 
   const prevSlide = () => {
     if (currentSlide > 0) {
-      setCurrentSlide(currentSlide - 1);
+      stopCurrentNarration(); // Stop current narration
+      const newSlideIndex = currentSlide - 1;
+      setCurrentSlide(newSlideIndex);
+
+      // Auto-play narration for the new slide
+      const newSlideData = slides[newSlideIndex];
+      if (newSlideData.narration) {
+        setTimeout(() => {
+          speakText(newSlideData.narration!);
+        }, 500); // Small delay to let slide transition complete
+      }
     }
   };
+
+  // Auto-play narration when component first loads
+  useEffect(() => {
+    const firstSlide = slides[0];
+    if (firstSlide && firstSlide.narration) {
+      setTimeout(() => {
+        speakText(firstSlide.narration!);
+      }, 1000); // Delay to let component fully mount
+    }
+  }, []); // Only run once on mount
 
   const currentSlideData = slides[currentSlide];
 
@@ -484,12 +526,12 @@ export function Course1_1_BilanganMaterial({ courseId }: CourseComponentProps) {
                   ? "Memutar..."
                   : !isSessionActive && status
                   ? "Memulai AI..."
-                  : "Dengarkan"}
+                  : "Dengar Ulang"}
               </Button>
             )}
 
             <div className="flex space-x-2">
-              {slides.map((_, index) => (
+              {slides.map((_, index: number) => (
                 <button
                   key={index}
                   onClick={() => setCurrentSlide(index)}
