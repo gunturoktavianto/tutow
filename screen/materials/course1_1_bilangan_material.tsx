@@ -407,23 +407,47 @@ export function Course1_1_BilanganMaterial({ courseId }: CourseComponentProps) {
     setIsPlaying(true);
 
     try {
+      // Check if session is active, if not start it
       if (!isSessionActive) {
         await startSession();
-        // Wait a moment for session to initialize
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        // Wait longer for session to properly initialize
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        // Double check if session is now active
+        if (!isSessionActive) {
+          console.warn("Session failed to start properly");
+          setIsPlaying(false);
+          return;
+        }
+      }
+
+      // Additional safety check before sending message
+      if (status.includes("Error") || status.includes("Disconnected")) {
+        console.warn("Cannot send message - session in error state:", status);
+        setIsPlaying(false);
+        return;
       }
 
       // Send the narration text to AI for speech
       const narrationPrompt = `Tolong bacakan teks berikut dengan suara yang ramah dan cocok untuk anak SD. Gunakan intonasi yang menarik dan jelas: "${text}"`;
-      sendTextMessage(narrationPrompt);
+      await sendTextMessage(narrationPrompt);
 
       // Set a timeout to reset playing state
       setTimeout(() => {
         setIsPlaying(false);
-      }, 5000);
+      }, 8000); // Increased timeout for longer messages
     } catch (error) {
       console.error("Error in speakText:", error);
       setIsPlaying(false);
+
+      // Try to restart session on error
+      try {
+        if (isSessionActive) {
+          stopSession();
+        }
+      } catch (stopError) {
+        console.error("Error stopping session:", stopError);
+      }
     }
   };
 
@@ -463,9 +487,13 @@ export function Course1_1_BilanganMaterial({ courseId }: CourseComponentProps) {
   useEffect(() => {
     const firstSlide = slides[0];
     if (firstSlide && firstSlide.narration) {
-      setTimeout(() => {
+      // Increased delay to ensure component is fully mounted and ready
+      const timer = setTimeout(() => {
         speakText(firstSlide.narration!);
-      }, 1000); // Delay to let component fully mount
+      }, 2000);
+
+      // Cleanup timeout on unmount
+      return () => clearTimeout(timer);
     }
   }, []); // Only run once on mount
 
