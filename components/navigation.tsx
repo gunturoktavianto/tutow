@@ -119,7 +119,7 @@ export function Navigation() {
     { href: "/exercise", label: "Latihan", icon: Trophy },
     { href: "/garden", label: "Kebun", icon: Sprout },
     { href: "/leaderboard", label: "Leaderboard", icon: Crown },
-    { href: "/games", label: "Permainan", icon: Gamepad2 },
+    
   ];
 
   return (
@@ -128,12 +128,7 @@ export function Navigation() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-lg">
-              T
-            </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Tutow
-            </span>
+            <img src="/logo.png" alt="logo tutow" className="w-36 h-auto" />
           </Link>
 
           {/* Desktop Navigation */}
