@@ -8,67 +8,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { BookOpen, Trophy, Gamepad2, Star, Users, Target } from "lucide-react";
+import HeroSection from "@/components/HeroSection";
+import FeatureSection from "@/components/FeatureSection";
 
 export default function Home() {
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 pt-16 pb-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="mb-8">
-              <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center text-white font-bold text-4xl mx-auto mb-6">
-                T
-              </div>
-              <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
-                Tutow
-              </h1>
-              <p className="text-xl text-gray-600 mb-8">
-                Belajar Matematika Seru untuk Anak SD
-              </p>
-            </div>
-
-            <div className="max-w-3xl mx-auto mb-10">
-              <p className="text-lg text-gray-700 leading-relaxed">
-                Bergabunglah dengan petualangan matematika yang menyenangkan!
-                Tutow membantu anak-anak SD belajar matematika dengan cara yang
-                interaktif, gamified, dan mudah dipahami.
-              </p>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <Link href="/register">
-                <Button
-                  size="lg"
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 text-lg"
-                >
-                  Mulai Belajar Sekarang
-                </Button>
-              </Link>
-              <Link href="/login">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="px-8 py-3 text-lg"
-                >
-                  Masuk ke Akun
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Decorative elements */}
-        <div className="absolute top-20 left-10 text-yellow-400 animate-bounce">
-          <Star className="w-8 h-8" />
-        </div>
-        <div className="absolute top-32 right-16 text-blue-400 animate-pulse">
-          <BookOpen className="w-10 h-10" />
-        </div>
-        <div className="absolute bottom-20 left-20 text-purple-400 animate-bounce delay-1000">
-          <Trophy className="w-8 h-8" />
-        </div>
-      </section>
+      <HeroSection />
+      <FeatureSection />
 
       {/* Features Section */}
       <section className="py-20 bg-white">
@@ -190,22 +137,13 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-50 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="flex items-center justify-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold">
-                T
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Tutow
-              </span>
-            </div>
-            <p className="text-gray-600">
-              © 2024 Tutow. Aplikasi edukasi matematika untuk anak Indonesia.
-            </p>
-          </div>
-        </div>
+      <footer className="flex items-center justify-center gap-4 p-4 border-t border-purple-500">
+        <img src="/logo.png" alt="logo tutow" className="w-24 h-auto" />
+        <p className="text-sm text-gray-800 whitespace-nowrap">
+          © 2025 <strong>Tutow.</strong> Aplikasi{" "}
+          <span className="text-indigo-600 font-semibold">edukasi</span>{" "}
+          matematika untuk anak Indonesia.
+        </p>
       </footer>
     </div>
   );
