@@ -575,15 +575,18 @@ export function Course1_1_BilanganMaterial({ courseId }: CourseComponentProps) {
             </div>
           </div>
 
-          <Button
-            onClick={nextSlide}
-            disabled={currentSlide === slides.length - 1}
-            size="lg"
-            className="px-6 py-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 disabled:opacity-50"
-          >
-            {currentSlide === slides.length - 1 ? "Selesai" : "Selanjutnya"}
-            <ArrowRight className="w-5 h-5 ml-2" />
-          </Button>
+          {currentSlide < slides.length - 1 ? (
+            <Button
+              onClick={nextSlide}
+              size="lg"
+              className="px-6 py-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 disabled:opacity-50"
+            >
+              Selanjutnya
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
+          ) : (
+            <div />
+          )}
         </div>
       </div>
 

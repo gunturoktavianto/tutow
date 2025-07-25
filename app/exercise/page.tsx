@@ -58,7 +58,7 @@ export default async function ExercisePage() {
       <div className="grid gap-6">
         {grades.map((grade) => (
           <Card key={grade.id} className="overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+            <CardHeader className="bg-blue-500 text-white p-4">
               <CardTitle className="text-xl">{grade.displayName}</CardTitle>
               <CardDescription className="text-blue-100">
                 {grade.materials.length} materi tersedia
