@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ArrowLeft, BookOpen, Target, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { titleToSlug } from "@/lib/utils";
 import { CourseLoader } from "@/lib/course-loader";
 import { loadMaterialComponent } from "@/lib/course-loader";
 import { Suspense } from "react";
+import { AITutor, AITutorRef } from "@/components/ai-tutor";
 import "@/screen/courses";
 
 interface Course {
@@ -48,6 +49,7 @@ export function CoursePage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<"material" | "exercise">("material");
+  const aiTutorRef = useRef<AITutorRef>(null);
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -140,6 +142,8 @@ export function CoursePage({
           courseId={courseId}
           courseData={course}
           mode="material"
+          onExplainMaterial={handleExplainMaterial}
+          onExplainProblem={handleExplainProblem}
         />
       </Suspense>
     );
@@ -158,8 +162,22 @@ export function CoursePage({
         onError={(error) => {
           console.error("Error loading course component:", error);
         }}
+        onExplainMaterial={handleExplainMaterial}
+        onExplainProblem={handleExplainProblem}
       />
     );
+  };
+
+  const handleExplainMaterial = (material: string) => {
+    if (aiTutorRef.current?.explainMaterial) {
+      aiTutorRef.current.explainMaterial(material);
+    }
+  };
+
+  const handleExplainProblem = (problem: string) => {
+    if (aiTutorRef.current?.explainProblem) {
+      aiTutorRef.current.explainProblem(problem);
+    }
   };
 
   const MaterialLoadingFallback = () => (
@@ -316,6 +334,14 @@ export function CoursePage({
           ? renderMaterialContent()
           : renderExerciseContent()}
       </div>
+
+      <AITutor
+        ref={aiTutorRef}
+        courseTitle={course.title}
+        currentMaterial={`${course.title} - ${
+          course.description || "Materi pembelajaran matematika"
+        }`}
+      />
     </div>
   );
 }

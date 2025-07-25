@@ -7,12 +7,16 @@ export interface CourseLoaderProps {
   courseData?: any; // Additional course data from database
   fallback?: React.ReactNode;
   onError?: (error: Error) => void;
+  onExplainMaterial?: (material: string) => void;
+  onExplainProblem?: (problem: string) => void;
 }
 
 export interface CourseComponentProps {
   courseId: string;
   courseData?: any;
   mode?: "material" | "exercise";
+  onExplainMaterial?: (material: string) => void;
+  onExplainProblem?: (problem: string) => void;
 }
 
 export function CourseLoader({
@@ -20,6 +24,8 @@ export function CourseLoader({
   courseData,
   fallback,
   onError,
+  onExplainMaterial,
+  onExplainProblem,
 }: CourseLoaderProps): React.ReactElement {
   try {
     const courseEntry = getCourseComponent(courseId);
@@ -34,6 +40,8 @@ export function CourseLoader({
       courseId: courseData?.id || courseId, // Use database ID for progress tracking
       courseData,
       metadata,
+      onExplainMaterial,
+      onExplainProblem,
     } as CourseComponentProps);
   } catch (error) {
     console.error(`Error loading course ${courseId}:`, error);

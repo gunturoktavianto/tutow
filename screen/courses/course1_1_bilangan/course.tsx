@@ -4,7 +4,14 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { CheckCircle, XCircle, ArrowRight, Star, Trophy } from "lucide-react";
+import {
+  CheckCircle,
+  XCircle,
+  ArrowRight,
+  Star,
+  Trophy,
+  Bot,
+} from "lucide-react";
 
 interface CountingExercise {
   id: number;
@@ -203,9 +210,13 @@ const GridInput = ({
 export function Course1_1_Bilangan({
   courseId,
   courseData,
+  onExplainMaterial,
+  onExplainProblem,
 }: {
   courseId: string;
   courseData?: any;
+  onExplainMaterial?: (material: string) => void;
+  onExplainProblem?: (problem: string) => void;
 }) {
   // Main flow states
   const [currentStep, setCurrentStep] = useState<
@@ -468,14 +479,32 @@ export function Course1_1_Bilangan({
                   </div>
                 </div>
 
-                <Button
-                  size="lg"
-                  onClick={handleAnswer}
-                  disabled={!userAnswer.number || !userAnswer.word}
-                  className="px-8 py-4 text-xl rounded-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 transform hover:scale-105 transition-all"
-                >
-                  Periksa Jawaban! ✓
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                  <Button
+                    size="lg"
+                    onClick={handleAnswer}
+                    disabled={!userAnswer.number || !userAnswer.word}
+                    className="px-8 py-4 text-xl rounded-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 transform hover:scale-105 transition-all"
+                  >
+                    Periksa Jawaban! ✓
+                  </Button>
+
+                  {onExplainProblem && (
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      onClick={() =>
+                        onExplainProblem(
+                          `Bagaimana cara menghitung ${exercise.objects.count} benda ${exercise.objects.type} dan menulis angka serta kata bilangannya?`
+                        )
+                      }
+                      className="px-6 py-4 text-lg rounded-full border-2 border-blue-300 hover:border-blue-500 transform hover:scale-105 transition-all"
+                    >
+                      <Bot className="w-5 h-5 mr-2" />
+                      Minta Bantuan AI
+                    </Button>
+                  )}
+                </div>
               </div>
             )}
 
