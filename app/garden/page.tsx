@@ -382,7 +382,7 @@ export default function GardenPage() {
 
         {/* Plant Selection Dialog */}
         <Dialog open={showPlantDialog} onOpenChange={setShowPlantDialog}>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="max-w-5xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Pilih Bibit untuk Ditanam</DialogTitle>
               <DialogDescription>
@@ -391,56 +391,64 @@ export default function GardenPage() {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {["bronze", "silver", "gold"].map((grade) => (
-                <div key={`grade-${grade}`} className="space-y-3">
-                  <h3 className="font-semibold text-lg capitalize flex items-center">
-                    {getGradeIcon(grade)}
-                    <span className="ml-2">{grade}</span>
-                  </h3>
-                  {plantTypes
-                    .filter((plant) => plant.grade === grade)
-                    .map((plant) => (
-                      <Card
-                        key={`plant-dialog-${plant.id}`}
-                        className="cursor-pointer hover:shadow-md transition-shadow"
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex justify-between items-start mb-2">
-                            <div>
-                              <h4 className="font-medium">
-                                {plant.displayName}
-                              </h4>
-                              <p className="text-sm text-gray-600">
-                                {plant.description}
-                              </p>
+            <div className="flex gap-6">
+              {["bronze", "silver", "gold"].map((grade, index) => (
+                <div key={`tier-container-${grade}`} className="flex-1 flex">
+                  <div className="flex-1 space-y-3">
+                    <h3 className="font-semibold text-lg capitalize flex items-center justify-center">
+                      {getGradeIcon(grade)}
+                      <span className="ml-2">{grade}</span>
+                    </h3>
+                    {plantTypes
+                      .filter((plant) => plant.grade === grade)
+                      .map((plant) => (
+                        <Card
+                          key={`plant-dialog-${plant.id}`}
+                          className="cursor-pointer hover:shadow-md transition-shadow"
+                        >
+                          <CardContent className="p-4">
+                            <div className="flex flex-col items-center text-center mb-2">
+                              <div className="mb-2">
+                                <h4 className="font-medium text-sm">
+                                  {plant.displayName}
+                                </h4>
+                                <p className="text-xs text-gray-600">
+                                  {plant.description}
+                                </p>
+                              </div>
+                              <Badge className={getGradeColor(plant.grade)}>
+                                {plant.seedPrice} Gold
+                              </Badge>
                             </div>
-                            <Badge className={getGradeColor(plant.grade)}>
-                              {plant.seedPrice} Gold
-                            </Badge>
-                          </div>
-                          <div className="flex justify-between items-center text-sm text-gray-500 mb-3">
-                            <span>Siram: {plant.waterCost} Gold</span>
-                            <span>XP: {plant.xpReward}</span>
-                          </div>
-                          <Button
-                            onClick={() =>
-                              selectedPot !== null &&
-                              handleAction("plant", selectedPot, plant.id)
-                            }
-                            disabled={
-                              actionLoading || userGold < plant.seedPrice
-                            }
-                            className="w-full"
-                            size="sm"
-                          >
-                            {userGold < plant.seedPrice
-                              ? "Gold Tidak Cukup"
-                              : "Tanam"}
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    ))}
+                            <div className="flex justify-between items-center text-xs text-gray-500 mb-3">
+                              <span>Siram: {plant.waterCost} Gold</span>
+                              <span>XP: {plant.xpReward}</span>
+                            </div>
+                            <Button
+                              onClick={() =>
+                                selectedPot !== null &&
+                                handleAction("plant", selectedPot, plant.id)
+                              }
+                              disabled={
+                                actionLoading || userGold < plant.seedPrice
+                              }
+                              className="w-full"
+                              size="sm"
+                            >
+                              {userGold < plant.seedPrice
+                                ? "Gold Tidak Cukup"
+                                : "Tanam"}
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      ))}
+                  </div>
+                  {/* Separator between columns */}
+                  {index < 2 && (
+                    <div className="flex items-center px-3">
+                      <div className="w-px bg-gray-300 h-full min-h-[400px]"></div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

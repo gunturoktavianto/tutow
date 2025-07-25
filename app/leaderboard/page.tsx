@@ -183,6 +183,7 @@ export default function LeaderboardPage() {
                 <PaginationItem>
                   <PaginationPrevious
                     href="#"
+                    size="default"
                     onClick={(e) => {
                       e.preventDefault();
                       if (data.pagination.hasPrevPage) {
@@ -203,6 +204,7 @@ export default function LeaderboardPage() {
                 ).map((page) => (
                   <PaginationItem key={page}>
                     <PaginationLink
+                      size="icon"
                       href="#"
                       onClick={(e) => {
                         e.preventDefault();
@@ -217,6 +219,7 @@ export default function LeaderboardPage() {
 
                 <PaginationItem>
                   <PaginationNext
+                    size="default"
                     href="#"
                     onClick={(e) => {
                       e.preventDefault();
