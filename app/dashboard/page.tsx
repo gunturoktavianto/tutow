@@ -252,47 +252,6 @@ export default function Dashboard() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Daily Tasks */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Clock className="w-5 h-5" />
-                  <span>Tugas Harian</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {dailyTasks.map((task: any, index: number) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between"
-                  >
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">
-                        {task.task}
-                      </p>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <Progress
-                          value={(task.progress / task.target) * 100}
-                          className="h-1 flex-1"
-                        />
-                        <span className="text-xs text-gray-500">
-                          {task.progress}/{task.target}
-                        </span>
-                      </div>
-                    </div>
-                    {task.completed && (
-                      <Badge
-                        variant="secondary"
-                        className="ml-2 bg-green-100 text-green-800"
-                      >
-                        ✓
-                      </Badge>
-                    )}
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
             {/* Recent Badges */}
             <Card>
               <CardHeader>
