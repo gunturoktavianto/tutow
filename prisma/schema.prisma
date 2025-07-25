@@ -160,6 +160,7 @@ model Exercise {
   grade    Grade             @relation(fields: [gradeId], references: [id])
   answers  ExerciseAnswer[]
 
+  @@unique([materialId, question])
   @@map("exercises")
 }
 
