@@ -428,10 +428,10 @@ export function Course1_2_NumberBonds({ courseId }: CourseComponentProps) {
           Lengkapi Ikatan Bilangan
         </h3>
 
-        <div className="flex justify-center items-center mb-8">
-          <div className="relative">
+        <div className="flex justify-center items-center mb-12 mt-20">
+          <div className="relative" style={{ width: "200px", height: "120px" }}>
             {/* Top circle (sum) */}
-            <div className="absolute -top-16 left-1/2 transform -translate-x-1/2">
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 z-10">
               <Input
                 type="number"
                 value={userAnswers["bond"] || ""}
@@ -446,7 +446,7 @@ export function Course1_2_NumberBonds({ courseId }: CourseComponentProps) {
             </div>
 
             {/* Bottom circles (addends) */}
-            <div className="flex gap-8 items-center">
+            <div className="absolute bottom-0 left-0 right-0 flex justify-between items-center">
               <div className="w-16 h-16 bg-blue-100 border-4 border-blue-400 rounded-full flex items-center justify-center">
                 <span className="text-2xl font-bold text-blue-800">
                   {exercise.leftNumber}
@@ -460,25 +460,22 @@ export function Course1_2_NumberBonds({ courseId }: CourseComponentProps) {
             </div>
 
             {/* Connecting lines */}
-            <svg
-              className="absolute inset-0 w-full h-full pointer-events-none"
-              style={{ top: "-32px" }}
-            >
+            <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
               <line
                 x1="50%"
                 y1="32"
-                x2="25%"
-                y2="80"
+                x2="20%"
+                y2="88"
                 stroke="#666"
-                strokeWidth="2"
+                strokeWidth="3"
               />
               <line
                 x1="50%"
                 y1="32"
-                x2="75%"
-                y2="80"
+                x2="80%"
+                y2="88"
                 stroke="#666"
-                strokeWidth="2"
+                strokeWidth="3"
               />
             </svg>
           </div>
