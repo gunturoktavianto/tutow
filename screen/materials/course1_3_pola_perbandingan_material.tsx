@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Volume2, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Volume2 } from "lucide-react";
 import { CourseComponentProps } from "@/lib/course-loader";
 
 interface MaterialSlide {
@@ -13,6 +13,11 @@ interface MaterialSlide {
   title: string;
   content: React.ReactNode;
   narration?: string;
+}
+
+interface InteractiveState {
+  pattern1?: string;
+  pattern2?: number;
 }
 
 const PatternBlock = ({
@@ -243,7 +248,7 @@ export function Course1_3_PolaPerbandinganMaterial({
                         : "border-gray-400 hover:border-orange-400"
                     }`}
                     onClick={() => {
-                      setInteractiveState((prev) => ({
+                      setInteractiveState((prev: InteractiveState) => ({
                         ...prev,
                         pattern1: prev.pattern1 === "red" ? "blue" : "red",
                       }));
@@ -284,7 +289,7 @@ export function Course1_3_PolaPerbandinganMaterial({
                           : "border-gray-400 hover:border-green-400"
                       }`}
                       onClick={() => {
-                        setInteractiveState((prev) => ({
+                        setInteractiveState((prev: InteractiveState) => ({
                           ...prev,
                           pattern2: 7,
                         }));
@@ -301,7 +306,7 @@ export function Course1_3_PolaPerbandinganMaterial({
                           : "border-gray-400 hover:border-red-400"
                       }`}
                       onClick={() => {
-                        setInteractiveState((prev) => ({
+                        setInteractiveState((prev: InteractiveState) => ({
                           ...prev,
                           pattern2: 6,
                         }));

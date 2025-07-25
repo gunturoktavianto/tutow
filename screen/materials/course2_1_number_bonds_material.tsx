@@ -196,7 +196,7 @@ export function Course2_1_NumberBondsMaterial({
                   right={bond.right}
                   interactive={true}
                   onClick={() => {
-                    setInteractiveState((prev) => ({
+                    setInteractiveState((prev: Record<string, boolean>) => ({
                       ...prev,
                       [`bond_${index}`]: !prev[`bond_${index}`],
                     }));

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Volume2, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Volume2 } from "lucide-react";
 import { CourseComponentProps } from "@/lib/course-loader";
 
 interface MaterialSlide {
@@ -176,7 +176,7 @@ export function Course1_2_GanjilGenapUrutanMaterial({
                     : "bg-white border-gray-300 hover:border-purple-400"
                 }`}
                 onClick={() => {
-                  setInteractiveState((prev) => ({
+                  setInteractiveState((prev: Record<string, boolean>) => ({
                     ...prev,
                     [`num_${num}`]: !prev[`num_${num}`],
                   }));
