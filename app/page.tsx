@@ -319,7 +319,7 @@ export default function Home() {
                 Daftar Gratis Sekarang
               </Button>
             </Link>
-            <Link href="https://drive.google.com/drive/folders/1_nC0BkQ50iNH3em0hPXnQXxOg0cvg7H8?usp=sharing">
+            <Link href="bit.ly/video-demo-tutow">
               <Button
                 size="lg"
                 variant="outline"
