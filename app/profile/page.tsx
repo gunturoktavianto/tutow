@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
+import { ExerciseProgress } from "@/components/exercise-progress";
 import {
   User,
   School,
@@ -385,6 +386,25 @@ export default function ProfilePage() {
                     )}
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Exercise Progress */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Trophy className="w-5 h-5 text-green-600" />
+                  <span>Progress Latihan</span>
+                </CardTitle>
+                <CardDescription>
+                  Statistik lengkap hasil latihan soal kamu
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ExerciseProgress
+                  showMaterialStats={true}
+                  showRecentSessions={true}
+                />
               </CardContent>
             </Card>
           </div>

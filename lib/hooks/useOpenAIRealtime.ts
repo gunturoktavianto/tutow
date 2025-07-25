@@ -288,6 +288,7 @@ export default function useOpenAIRealtime(
           "Content-Type": "application/sdp",
         },
       });
+      console.log("sini");
 
       const answerSdp = await response.text();
       await pc.setRemoteDescription({ type: "answer", sdp: answerSdp });
