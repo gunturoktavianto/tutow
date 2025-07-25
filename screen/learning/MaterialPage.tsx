@@ -163,7 +163,7 @@ export function MaterialPage({ gradeNumber, materialId }: MaterialPageProps) {
   return (
     <div className="container mx-auto px-4 py-6">
       {/* Simple Header */}
-      <div className="mb-6 text-center">
+      <div className="mb-6">
         <Link href={`/learning/${gradeNumber}`} className="inline-block mb-4">
           <Button variant="outline" size="lg" className="rounded-full">
             ← Kembali
