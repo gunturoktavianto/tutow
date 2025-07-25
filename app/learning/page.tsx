@@ -26,19 +26,70 @@ interface ExtendedUser {
   currentGrade?: number;
 }
 
+interface Grade {
+  id: string;
+  name: string;
+  description: string;
+  order: number;
+}
+
+interface Material {
+  id: string;
+  name: string;
+  displayName: string;
+  description: string | null;
+  order: number;
+  courses: Course[];
+  _count: {
+    courses: number;
+  };
+}
+
+interface Course {
+  id: string;
+  title: string;
+  level: number;
+  order: number;
+}
+
+interface GradeWithProgress extends Grade {
+  totalMaterials: number;
+  completedMaterials: number;
+  progress: number;
+  color: string;
+}
+
 export default function Learning() {
   const { data: session, status } = useSession();
   const [userProgress, setUserProgress] = useState({
     currentGrade: 1,
     totalXP: 0,
   });
+  const [grades, setGrades] = useState<GradeWithProgress[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const gradeColors = [
+    "from-blue-400 to-blue-600",
+    "from-green-400 to-green-600",
+    "from-purple-400 to-purple-600",
+    "from-pink-400 to-pink-600",
+    "from-orange-400 to-orange-600",
+    "from-red-400 to-red-600",
+  ];
+
+  const gradeDescriptions = [
+    "Dasar-dasar matematika: Bilangan, Penjumlahan, Pengurangan",
+    "Perkalian, Pembagian, Pengukuran",
+    "Pecahan, Desimal, Geometri Dasar",
+    "Operasi Lanjutan, Grafik, Pola Bilangan",
+    "Volume, Luas, Koordinat, Statistik",
+    "Persiapan SMP: Aljabar Dasar, Persamaan",
+  ];
 
   const fetchUserData = useCallback(async () => {
     if (status === "loading") return;
 
     try {
-      // Fetch fresh data from API to ensure we have the latest XP
       const response = await fetch("/api/user/profile");
       if (response.ok) {
         const data = await response.json();
@@ -47,7 +98,6 @@ export default function Learning() {
           totalXP: data.user.xp || 0,
         });
       } else if (session?.user) {
-        // Fallback to session data if API fails
         const user = session.user as ExtendedUser;
         setUserProgress({
           currentGrade: user.currentGrade || 1,
@@ -56,7 +106,6 @@ export default function Learning() {
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
-      // Fallback to session data
       if (session?.user) {
         const user = session.user as ExtendedUser;
         setUserProgress({
@@ -64,20 +113,98 @@ export default function Learning() {
           totalXP: user.xp || 0,
         });
       }
+    }
+  }, [session, status]);
+
+  const fetchGradesWithProgress = useCallback(async () => {
+    try {
+      const gradesResponse = await fetch("/api/grades");
+      const gradesData = await gradesResponse.json();
+
+      const gradesWithProgress: GradeWithProgress[] = await Promise.all(
+        gradesData.grades.map(async (grade: Grade, index: number) => {
+          try {
+            const materialsResponse = await fetch(
+              `/api/materials?gradeId=${grade.id}`
+            );
+            const materialsData = await materialsResponse.json();
+
+            const progressResponse = await fetch(
+              `/api/progress?gradeId=${grade.id}`
+            );
+            const progressData = await progressResponse.json();
+
+            const materials: Material[] = materialsData.materials || [];
+            const userProgressData = progressData.progress || [];
+
+            const completedMaterials = materials.filter((material) => {
+              const materialProgress = userProgressData.filter(
+                (progress: any) =>
+                  progress.materialId === material.id && progress.completed
+              );
+              return (
+                material.courses.length > 0 &&
+                materialProgress.length === material.courses.length
+              );
+            }).length;
+
+            const progress =
+              materials.length > 0
+                ? Math.round((completedMaterials / materials.length) * 100)
+                : 0;
+
+            return {
+              ...grade,
+              totalMaterials: materials.length,
+              completedMaterials,
+              progress,
+              color: gradeColors[index % gradeColors.length],
+              description:
+                gradeDescriptions[index] ||
+                `Materi pembelajaran untuk ${grade.name}`,
+            };
+          } catch (error) {
+            console.error(
+              `Error fetching data for grade ${grade.name}:`,
+              error
+            );
+            return {
+              ...grade,
+              totalMaterials: 0,
+              completedMaterials: 0,
+              progress: 0,
+              color: gradeColors[index % gradeColors.length],
+              description:
+                gradeDescriptions[index] ||
+                `Materi pembelajaran untuk ${grade.name}`,
+            };
+          }
+        })
+      );
+
+      setGrades(gradesWithProgress);
+    } catch (error) {
+      console.error("Error fetching grades:", error);
     } finally {
       setLoading(false);
     }
-  }, [session, status]);
+  }, []);
 
   useEffect(() => {
     fetchUserData();
   }, [fetchUserData]);
 
-  // Refresh data when the page becomes visible (user returns from course)
+  useEffect(() => {
+    if (status !== "loading") {
+      fetchGradesWithProgress();
+    }
+  }, [status, fetchGradesWithProgress]);
+
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible" && session?.user) {
         fetchUserData();
+        fetchGradesWithProgress();
       }
     };
 
@@ -85,7 +212,7 @@ export default function Learning() {
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [session, fetchUserData]);
+  }, [session, fetchUserData, fetchGradesWithProgress]);
 
   if (status === "loading" || loading) {
     return (
@@ -98,66 +225,8 @@ export default function Learning() {
     );
   }
 
-  const grades = [
-    {
-      id: 1,
-      name: "Kelas 1",
-      description: "Dasar-dasar matematika: Bilangan, Penjumlahan, Pengurangan",
-      totalMaterials: 4,
-      completedMaterials: 2,
-      progress: 50,
-      color: "from-blue-400 to-blue-600",
-    },
-    {
-      id: 2,
-      name: "Kelas 2",
-      description: "Perkalian, Pembagian, Pengukuran",
-      totalMaterials: 5,
-      completedMaterials: 0,
-      progress: 0,
-      color: "from-green-400 to-green-600",
-    },
-    {
-      id: 3,
-      name: "Kelas 3",
-      description: "Pecahan, Desimal, Geometri Dasar",
-      totalMaterials: 6,
-      completedMaterials: 0,
-      progress: 0,
-      color: "from-purple-400 to-purple-600",
-    },
-    {
-      id: 4,
-      name: "Kelas 4",
-      description: "Operasi Lanjutan, Grafik, Pola Bilangan",
-      totalMaterials: 7,
-      completedMaterials: 0,
-      progress: 0,
-      color: "from-pink-400 to-pink-600",
-    },
-    {
-      id: 5,
-      name: "Kelas 5",
-      description: "Volume, Luas, Koordinat, Statistik",
-      totalMaterials: 8,
-      completedMaterials: 0,
-      progress: 0,
-      color: "from-orange-400 to-orange-600",
-    },
-    {
-      id: 6,
-      name: "Kelas 6",
-      description: "Persiapan SMP: Aljabar Dasar, Persamaan",
-      totalMaterials: 9,
-      completedMaterials: 0,
-      progress: 0,
-      color: "from-red-400 to-red-600",
-    },
-  ];
-
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Header */}
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">
           🎓 Pilih Kelas Belajar
@@ -168,7 +237,6 @@ export default function Learning() {
         </p>
       </div>
 
-      {/* Current Progress Banner */}
       <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-6 text-white mb-8">
         <div className="flex items-center justify-between">
           <div>
@@ -184,18 +252,18 @@ export default function Learning() {
         </div>
       </div>
 
-      {/* Grades Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {grades.map((grade) => (
           <Card
             key={grade.id}
             className="relative overflow-hidden border-2 transition-all duration-300 hover:shadow-lg border-blue-200 hover:border-blue-300 cursor-pointer"
           >
-            {/* Gradient Header */}
             <div className={`h-20 bg-gradient-to-r ${grade.color} relative`}>
               <div className="absolute inset-0 bg-black/10"></div>
               <div className="relative z-10 flex items-center justify-between h-full px-6">
-                <h3 className="text-2xl font-bold text-white">{grade.name}</h3>
+                <h3 className="text-2xl font-bold text-white">
+                  Kelas {grade.name}
+                </h3>
                 <CheckCircle className="w-8 h-8 text-white" />
               </div>
             </div>
@@ -207,7 +275,6 @@ export default function Learning() {
             </CardHeader>
 
             <CardContent className="space-y-4">
-              {/* Progress */}
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-medium text-gray-700">
@@ -223,7 +290,6 @@ export default function Learning() {
                 </p>
               </div>
 
-              {/* Stats */}
               <div className="flex items-center text-sm text-gray-600">
                 <div className="flex items-center space-x-1">
                   <BookOpen className="w-4 h-4" />
@@ -231,9 +297,8 @@ export default function Learning() {
                 </div>
               </div>
 
-              {/* Action Button */}
               <div className="pt-2">
-                <Link href={`/learning/${grade.id}`}>
+                <Link href={`/learning/${grade.name}`}>
                   <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
                     {grade.progress > 0 ? "Lanjutkan Belajar" : "Mulai Belajar"}
                   </Button>
@@ -244,32 +309,7 @@ export default function Learning() {
         ))}
       </div>
 
-      {/* Help Section */}
-      <div className="mt-12 bg-blue-50 rounded-2xl p-8 border border-blue-100">
-        <div className="text-center">
-          <div className="text-4xl mb-4">🤔</div>
-          <h3 className="text-xl font-bold text-gray-900 mb-3">
-            Tidak yakin dari kelas mana harus mulai?
-          </h3>
-          <p className="text-gray-600 mb-6">
-            Tidak masalah! Kamu bisa mulai dari kelas manapun yang kamu rasa
-            cocok dengan kemampuanmu saat ini.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/learning/1">
-              <Button
-                variant="outline"
-                className="border-blue-300 text-blue-700 hover:bg-blue-50"
-              >
-                Mulai dari Kelas 1
-              </Button>
-            </Link>
-            <Button variant="outline" className="border-gray-300">
-              Tes Penempatan
-            </Button>
-          </div>
-        </div>
-      </div>
+      
     </div>
   );
 }
