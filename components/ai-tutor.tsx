@@ -269,9 +269,9 @@ export const AITutor = forwardRef<AITutorRef, AITutorProps>(
       }
     };
 
-    const handleExplainMaterial = () => {
-      if (currentMaterial) {
-        explainMaterial(currentMaterial);
+    const handleExplainMaterial = (slideContent: string) => {
+      if (slideContent) {
+        explainMaterial(slideContent);
         setIsExpanded(true);
       }
     };
@@ -311,19 +311,6 @@ export const AITutor = forwardRef<AITutorRef, AITutorProps>(
             )}
 
             <div className="flex gap-2">
-              {currentMaterial && (
-                <Button
-                  onClick={handleExplainMaterial}
-                  variant="outline"
-                  size="sm"
-                  className="bg-white shadow-lg hover:bg-blue-50"
-                  disabled={!isSessionActive}
-                >
-                  <Bot className="w-4 h-4 mr-1" />
-                  Jelaskan Materi
-                </Button>
-              )}
-
               <Button
                 onClick={() => setIsExpanded(true)}
                 variant="outline"
@@ -514,7 +501,11 @@ export const AITutor = forwardRef<AITutorRef, AITutorProps>(
             {currentMaterial && (
               <div className="flex gap-2">
                 <Button
-                  onClick={handleExplainMaterial}
+                  onClick={() => {
+                    if (currentMaterial) {
+                      handleExplainMaterial(currentMaterial);
+                    }
+                  }}
                   variant="outline"
                   size="sm"
                   className="flex-1"

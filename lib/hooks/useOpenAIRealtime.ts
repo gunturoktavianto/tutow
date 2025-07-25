@@ -369,8 +369,8 @@ export default function useOpenAIRealtime(
   }, []);
 
   const explainMaterial = useCallback(
-    (material: string) => {
-      const message = `Tolong jelaskan materi ini dengan cara yang mudah dipahami anak SD: ${material}`;
+    (context: string) => {
+      const message = `Tolong jelaskan materi ini dengan cara yang mudah dipahami anak SD: ${context}`;
       sendTextMessage(message);
     },
     [sendTextMessage]

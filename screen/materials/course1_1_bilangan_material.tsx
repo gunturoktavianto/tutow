@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -13,6 +13,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import { CourseComponentProps } from "@/lib/course-loader";
+import { AITutor, AITutorRef } from "@/components/ai-tutor";
+import useOpenAIRealtime from "@/lib/hooks/useOpenAIRealtime";
 
 interface MaterialSlide {
   id: number;
@@ -93,7 +95,13 @@ const ObjectRenderer = ({
 export function Course1_1_BilanganMaterial({ courseId }: CourseComponentProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [interactiveState, setInteractiveState] = useState<any>({});
+  const [interactiveState, setInteractiveState] = useState<
+    Record<string, boolean>
+  >({});
+  const aiTutorRef = useRef<AITutorRef>(null);
+
+  const { isSessionActive, startSession, sendTextMessage, status } =
+    useOpenAIRealtime("alloy");
 
   const slides: MaterialSlide[] = [
     {
@@ -383,15 +391,27 @@ export function Course1_1_BilanganMaterial({ courseId }: CourseComponentProps) {
     },
   ];
 
-  const speakText = (text: string) => {
-    if ("speechSynthesis" in window) {
-      setIsPlaying(true);
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = "id-ID";
-      utterance.rate = 0.8;
-      utterance.pitch = 1.2;
-      utterance.onend = () => setIsPlaying(false);
-      speechSynthesis.speak(utterance);
+  const speakText = async (text: string) => {
+    setIsPlaying(true);
+
+    try {
+      if (!isSessionActive) {
+        await startSession();
+        // Wait a moment for session to initialize
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+
+      // Send the narration text to AI for speech
+      const narrationPrompt = `Tolong bacakan teks berikut dengan suara yang ramah dan cocok untuk anak SD. Gunakan intonasi yang menarik dan jelas: "${text}"`;
+      sendTextMessage(narrationPrompt);
+
+      // Set a timeout to reset playing state
+      setTimeout(() => {
+        setIsPlaying(false);
+      }, 5000);
+    } catch (error) {
+      console.error("Error in speakText:", error);
+      setIsPlaying(false);
     }
   };
 
@@ -452,13 +472,19 @@ export function Course1_1_BilanganMaterial({ courseId }: CourseComponentProps) {
             {currentSlideData.narration && (
               <Button
                 onClick={() => speakText(currentSlideData.narration!)}
-                disabled={isPlaying}
+                disabled={
+                  isPlaying || (!isSessionActive && status.includes("Error"))
+                }
                 variant="outline"
                 size="lg"
                 className="px-6 py-3 rounded-full"
               >
                 <Volume2 className="w-5 h-5 mr-2" />
-                {isPlaying ? "Memutar..." : "Dengarkan"}
+                {isPlaying
+                  ? "Memutar..."
+                  : !isSessionActive && status
+                  ? "Memulai AI..."
+                  : "Dengarkan"}
               </Button>
             )}
 
