@@ -37,12 +37,61 @@ import {
   Menu,
   X,
   Crown,
+  Sprout,
 } from "lucide-react";
 
 export function Navigation() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { data: session, status } = useSession();
+  const [userStats, setUserStats] = useState({ xp: 0, gold: 0 });
+
+  const user = session?.user as ExtendedUser;
+  const currentXP = (userStats.xp || user?.xp) ?? 0;
+  const currentGold = (userStats.gold || user?.gold) ?? 0;
+
+  // Fetch fresh user data periodically and on session changes
+  useEffect(() => {
+    const fetchUserStats = async () => {
+      if (status === "authenticated" && session?.user) {
+        try {
+          const response = await fetch("/api/user/profile");
+          if (response.ok) {
+            const data = await response.json();
+            setUserStats({
+              xp: data.user.xp || 0,
+              gold: data.user.gold || 0,
+            });
+          }
+        } catch (error) {
+          console.error("Error fetching user stats:", error);
+          // Fallback to session data
+          setUserStats({
+            xp: user?.xp ?? 0,
+            gold: user?.gold ?? 0,
+          });
+        }
+      }
+    };
+
+    fetchUserStats();
+
+    // Also refresh when page becomes visible (user returns from another tab)
+    const handleVisibilityChange = () => {
+      if (
+        document.visibilityState === "visible" &&
+        status === "authenticated"
+      ) {
+        fetchUserStats();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [status, session, user]);
 
   if (status === "loading") {
     return (
@@ -64,14 +113,11 @@ export function Navigation() {
     );
   }
 
-  const user = session?.user as ExtendedUser;
-  const currentXP = user?.xp ?? 0;
-  const currentGold = user?.gold ?? 0;
-
   const navItems = [
     { href: "/dashboard", label: "Beranda", icon: Home },
     { href: "/learning", label: "Belajar", icon: BookOpen },
     { href: "/exercise", label: "Latihan", icon: Trophy },
+    { href: "/garden", label: "Kebun", icon: Sprout },
     { href: "/leaderboard", label: "Leaderboard", icon: Crown },
     { href: "/games", label: "Permainan", icon: Gamepad2 },
   ];

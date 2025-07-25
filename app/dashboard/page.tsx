@@ -1,3 +1,7 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import {
   Card,
@@ -20,15 +24,69 @@ import {
   TrendingUp,
   Award,
   Sprout,
+  Leaf,
 } from "lucide-react";
 
 export default function Dashboard() {
+  const { data: session, status } = useSession();
+  const [userStats, setUserStats] = useState({
+    name: "Adik Pintar",
+    xp: 0,
+    gold: 0,
+    currentGrade: 1,
+  });
+
+  useEffect(() => {
+    const fetchUserStats = async () => {
+      if (status === "authenticated" && session?.user) {
+        try {
+          const response = await fetch("/api/user/profile");
+          if (response.ok) {
+            const data = await response.json();
+            setUserStats({
+              name: data.user.name || "Adik Pintar",
+              xp: data.user.xp || 0,
+              gold: data.user.gold || 0,
+              currentGrade: data.user.currentGrade || 1,
+            });
+          }
+        } catch (error) {
+          console.error("Error fetching user stats:", error);
+          // Fallback to session data
+          if (session?.user) {
+            setUserStats({
+              name: session.user.name || "Adik Pintar",
+              xp: session.user.xp || 0,
+              gold: session.user.gold || 0,
+              currentGrade: session.user.currentGrade || 1,
+            });
+          }
+        }
+      }
+    };
+
+    fetchUserStats();
+
+    // Also refresh when page becomes visible (user returns from another tab)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible" && status === "authenticated") {
+        fetchUserStats();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [status, session]);
+
   // Mock data - akan diganti dengan data real dari database
   const user = {
-    name: "Adik Pintar",
-    xp: 1250,
-    gold: 340,
-    currentGrade: 1,
+    name: userStats.name,
+    xp: userStats.xp,
+    gold: userStats.gold,
+    currentGrade: userStats.currentGrade,
     streak: 5,
     totalLessonsCompleted: 23,
     totalExercisesCompleted: 45,
@@ -202,7 +260,7 @@ export default function Dashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   <Link href="/exercise/1">
                     <Button
                       variant="outline"
@@ -210,6 +268,15 @@ export default function Dashboard() {
                     >
                       <Trophy className="w-8 h-8 text-yellow-600" />
                       <span>Latihan Soal</span>
+                    </Button>
+                  </Link>
+                  <Link href="/garden">
+                    <Button
+                      variant="outline"
+                      className="w-full h-20 flex-col space-y-2"
+                    >
+                      <Sprout className="w-8 h-8 text-green-600" />
+                      <span>Kebun Saya</span>
                     </Button>
                   </Link>
                   <Link href="/games">
