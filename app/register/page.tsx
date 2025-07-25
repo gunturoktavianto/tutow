@@ -130,18 +130,7 @@ export default function Register() {
 
       <div className="w-full max-w-md">
         {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-white font-bold text-3xl mx-auto mb-4">
-            T
-          </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Tutow
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Mulai petualangan matematika seru!
-          </p>
-        </div>
-
+        <img src="/logo.png" alt="Tutow Logo" className="mx-auto mb-6 h-24" />
         <Card className="border-2 border-blue-100 shadow-xl">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl text-gray-900">

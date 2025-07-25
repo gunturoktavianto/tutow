@@ -161,53 +161,6 @@ export default function Dashboard() {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Learning Progress */}
           <div className="lg:col-span-2">
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <BookOpen className="w-5 h-5" />
-                  <span>Progress Belajar Kelas {user.currentGrade}</span>
-                </CardTitle>
-                <CardDescription>
-                  Lanjutkan petualangan matematika dari materi yang belum
-                  selesai
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {materials.map((material: any) => (
-                  <div
-                    key={material.id}
-                    className="border rounded-lg p-4 hover:shadow-md transition-shadow"
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <h3 className="font-semibold text-gray-900">
-                          {material.name}
-                        </h3>
-                        <p className="text-sm text-gray-600">
-                          {material.completedLessons}/{material.totalLessons}{" "}
-                          pelajaran selesai
-                        </p>
-                      </div>
-                      <Link href={`/learning/1/${material.id}`}>
-                        <Button
-                          size="sm"
-                          variant={
-                            material.progress > 0 ? "default" : "outline"
-                          }
-                        >
-                          {material.progress > 0 ? "Lanjutkan" : "Mulai"}
-                        </Button>
-                      </Link>
-                    </div>
-                    <Progress value={material.progress} className="h-2" />
-                    <p className="text-xs text-gray-500 mt-1">
-                      {material.progress}% selesai
-                    </p>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
             {/* Quick Actions */}
             <Card>
               <CardHeader>
