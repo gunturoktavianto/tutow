@@ -114,7 +114,7 @@ export function Navigation() {
   }
 
   const navItems = [
-    { href: "/dashboard", label: "Beranda", icon: Home },
+    { href: "/dashboard", label: "Dashboard", icon: Home },
     { href: "/learning", label: "Belajar", icon: BookOpen },
     { href: "/exercise", label: "Latihan", icon: Trophy },
     { href: "/garden", label: "Kebun", icon: Sprout },
